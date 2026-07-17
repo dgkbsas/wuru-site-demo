@@ -29,17 +29,18 @@ import boxPanelGif from "../../assets/videos/boxpanel-low.gif";
 
 <section class="hero">
   <span class="top-hero">
+    <!-- GIF (hidden for others navigators) -->
+    <img id="hero-gif" src={boxPanelGif.src} alt="box gif" class="cube-img" style="display: none;" />
+    
+    <HeroText />
+
     <!-- Video (hidden for Safari) -->
     <video id="hero-video" autoplay muted loop playsinline class="cube-img" style="display: none;">
       <source src={boxPanel} type="video/webm" />
     </video>
 
-    <!-- GIF (hidden for others navigators) -->
-    <img id="hero-gif" src={boxPanelGif.src} alt="box gif" class="cube-img" style="display: none;" />
-
-    <HeroText />
   </span>
-  <ScrollDown scrollDownTo="#social-proof-container" />
+  <ScrollDown scrollDownTo="#footer-container" />
 </section>
 
 <style lang="scss">
@@ -55,10 +56,9 @@ import boxPanelGif from "../../assets/videos/boxpanel-low.gif";
     gap: 48px;
     .top-hero {
       height: 100%;
-      width: 100%;
       display: flex;
       align-items: center;
-      justify-content: center;
+      justify-content: flex-end;
       position: relative;
     }
   }

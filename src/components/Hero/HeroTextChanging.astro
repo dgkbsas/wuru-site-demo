@@ -3,7 +3,7 @@
 ---
 
 <script>
-  const texts: string[] = ["ÁGILES", "INNOVADORES", "EFICIENTES", "AUTOMÁTICOS"];
+  const texts: string[] = ["SIN LÍMITES", "AGÉNTICO", "AUTÓNOMO"];
   let currentIndex = 0;
   const delayBetweenLetters = 50;
   const delayBeforeNextWord = 2000;
@@ -64,15 +64,16 @@
   :global(#animated-text .letter) {
     display: inline-block;
     opacity: 1;
+    white-space: pre; /* preserva el ancho del espacio en "SIN LÍMITES" */
     animation: animate-letter 0.2s ease-out;
   }
   .text-container {
-    font-size: 40px;
+    font-size: 48px;
     overflow: hidden;
   }
 
   #animated-text {
-    height: 56px;
+    height: 64px;
     color: #f1f1f1;
     font-weight: 900;
     letter-spacing: 1px;

@@ -3,8 +3,6 @@ import { Image } from "astro:assets";
 import WuruLogo from "../../assets/images/wuru-logo.svg";
 import UserCircle from "../../assets/images/user-circle.svg";
 import SocialMediaNav from "./SocialMediaNav.astro";
-import homeIcon from "../../assets/images/home-icon.svg";
-import solutionsIcon from "../../assets/images/solutions-icon.svg";
 ---
 
 <header class="floating-header">
@@ -13,18 +11,6 @@ import solutionsIcon from "../../assets/images/solutions-icon.svg";
       <a id="wuru-logo" href="/" title="Ir al inicio de WÚRU" rel="noopener noreferrer">
         <Image src={WuruLogo} alt="wuru-logo" height={32} class="wuru-logo" loading={"eager"} />
       </a>
-      <span class="icon-nav">
-        <a id="home-btn" href="/" title="Inicio" rel="noopener noreferrer">
-          <Image src={homeIcon} alt="login-icon" height={24} class="login-icon" loading={"eager"} />
-        </a>
-        <a id="solutions-btn" href="/solutions" title="Soluciones WÚRU" rel="noopener noreferrer">
-          <Image src={solutionsIcon} alt="login-icon" height={24} class="login-icon" loading={"eager"} />
-        </a>
-      </span>
-      <span class="typo-nav">
-        <a class="nav-link" id="home-btn" href="/" title="Inicio" rel="noopener noreferrer"> INICIO </a>
-        <a class="nav-link" id="solutions-btn" href="/solutions" title="Soluciones WÚRU" rel="noopener noreferrer"> SOLUCIONES </a>
-      </span>
     </div>
     <div class="right-side">
       <SocialMediaNav />
