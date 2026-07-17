@@ -1,0 +1,114 @@
+---
+import HeroTextChanging from "./HeroTextChanging.astro";
+---
+
+<div class="hero-text-container">
+  <h1>Flujos de trabajo</h1>
+  <HeroTextChanging />
+  <h3>para equipos de salud</h3>
+  <div class="line"></div>
+  <a class="product-btn" href="/solutions" title="Soluciones WÚRU" rel="noopener noreferrer">SOLUCIONES</a>
+</div>
+
+<style lang="scss">
+  @keyframes text-in-slide {
+    0% {
+      opacity: 0;
+      transform: translateX(10px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateX(0px);
+    }
+  }
+
+  @keyframes login-appears {
+    0% {
+      opacity: 0;
+      transform: scale(0.9);
+    }
+    80% {
+      transform: scale(1.05);
+    }
+    100% {
+      transform: scale(1);
+      opacity: 1;
+    }
+  }
+  .hero-text-container {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    gap: 2px;
+    left: 68%;
+  }
+  h1 {
+    margin: 0;
+    font-size: 38px;
+    font-weight: 300;
+    color: #f1f1f1;
+    animation: text-in-slide 0.2s ease-out forwards;
+  }
+  h3 {
+    margin: 0;
+    font-size: 24px;
+    color: #ec5a3d;
+    font-weight: 300;
+    animation: text-in-slide 0.2s ease-out forwards;
+    animation-delay: 0.2s;
+    filter: drop-shadow(0 2px 5px rgba(255, 0, 0, 0.5));
+  }
+  .line {
+    height: 0.5px;
+    width: 100px;
+    background-color: #ec5a3d;
+    border-radius: 0.5px;
+    margin-top: 16px;
+    opacity: 0.7;
+    animation-delay: 0.4s;
+    filter: drop-shadow(0 2px 5px rgba(255, 0, 0, 0.8));
+  }
+  .product-btn {
+    text-decoration: none;
+    color: #f1f1f1;
+    background-image: linear-gradient(to right top, #281722, #391725, #491722, #57181a, #601f0c);
+    border: solid 0.25px #7d170363;
+    padding: 8px 48px;
+    font-size: 14px;
+    border-radius: 24px;
+    transition: all 0.2s ease-in-out;
+    letter-spacing: 1px;
+    cursor: pointer;
+    margin-top: 32px;
+    box-shadow:
+      5px 5px 20px 0px #000000,
+      -5px -5px 20px 0px #400000;
+    opacity: 0;
+    animation: login-appears 0.2s ease-out forwards;
+    animation-delay: 0.5s;
+
+    &:hover {
+      border: solid 0.25px #7d1703bf;
+    }
+  }
+
+  @media only screen and (max-width: 1024px) {
+    .hero-text-container {
+      position: unset !important;
+      align-items: center !important;
+    }
+  }
+
+  @media only screen and (max-width: 480px) {
+    .hero-text-container {
+      h1 {
+        font-size: 32px !important;
+      }
+      h3 {
+        font-size: 20px !important;
+      }
+    }
+  }
+</style>

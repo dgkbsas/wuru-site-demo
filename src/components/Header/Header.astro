@@ -1,0 +1,183 @@
+---
+import { Image } from "astro:assets";
+import WuruLogo from "../../assets/images/wuru-logo.svg";
+import UserCircle from "../../assets/images/user-circle.svg";
+import SocialMediaNav from "./SocialMediaNav.astro";
+import homeIcon from "../../assets/images/home-icon.svg";
+import solutionsIcon from "../../assets/images/solutions-icon.svg";
+---
+
+<header class="header-container">
+  <div class="left-side">
+    <a id="wuru-logo" href="/" title="Ir al inicio de WÚRU" rel="noopener noreferrer">
+      <Image src={WuruLogo} alt="wuru-logo" height={32} class="wuru-logo" loading={"eager"} />
+    </a>
+    <span class="icon-nav">
+      <a id="home-btn" href="/" title="Inicio" rel="noopener noreferrer">
+        <Image src={homeIcon} alt="login-icon" height={24} class="login-icon" loading={"eager"} />
+      </a>
+      <a id="solutions-btn" href="/solutions" title="Soluciones WÚRU" rel="noopener noreferrer">
+        <Image src={solutionsIcon} alt="login-icon" height={24} class="login-icon" loading={"eager"} />
+      </a>
+    </span>
+    <span class="typo-nav">
+      <a class="nav-link" id="home-btn" href="/" title="Inicio" rel="noopener noreferrer"> INICIO </a>
+      <a class="nav-link" id="solutions-btn" href="/solutions" title="Soluciones WÚRU" rel="noopener noreferrer"> SOLUCIONES </a>
+    </span>
+  </div>
+  <div class="right-side">
+    <SocialMediaNav />
+    <a class="log-in-btn" href="http://app.wuru.ai" target="_blank" title="Iniciar sesión" rel="noopener noreferrer">
+      <span class="text">INICIAR SESIÓN</span>
+      <Image src={UserCircle} alt="login-icon" height={28} class="login-icon" loading={"eager"} />
+    </a>
+  </div>
+</header>
+
+<style lang="scss">
+  @keyframes logo-in-slide {
+    0% {
+      opacity: 0;
+      transform: translateX(-10px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateX(0px);
+    }
+  }
+
+  @keyframes login-appears {
+    0% {
+      opacity: 0;
+      transform: scale(0.9);
+    }
+    80% {
+      transform: scale(1.05);
+    }
+    100% {
+      transform: scale(1);
+      opacity: 1;
+    }
+  }
+
+  .header-container {
+    width: 100%;
+    color: #f1f1f1;
+    padding: 24px 48px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    .left-side {
+      display: flex;
+      align-items: baseline;
+      gap: 32px;
+
+      a {
+        text-decoration: none;
+        color: unset;
+      }
+      .typo-nav {
+        display: flex;
+        gap: 24px;
+      }
+      .icon-nav {
+        display: none;
+        align-items: center;
+        gap: 24px;
+        justify-content: center;
+        opacity: 0.7;
+      }
+      .nav-link {
+        font-size: 14px;
+        transition: all 0.2s ease-in-out;
+        letter-spacing: 1px;
+        opacity: 0;
+        animation: login-appears 0.2s ease-out forwards;
+        animation-delay: 0.25s;
+
+        &:hover {
+          color: #f1f1f1b0;
+        }
+      }
+      .wuru-logo {
+        filter: drop-shadow(2px 2px 4px rgb(0, 0, 0, 0.7));
+        animation: logo-in-slide 0.8s ease-out forwards;
+      }
+    }
+    .right-side {
+      font-size: 12px;
+      display: flex;
+      align-items: center;
+      gap: 64px;
+      .log-in-btn {
+        text-decoration: none;
+        color: #f1f1f1;
+        background-image: linear-gradient(45deg, #110e10, #1a1117, #21121d, #281319, #301a14);
+        border: solid 0.25px #7d170363;
+        padding: 8px 48px;
+        font-size: 12px;
+        border-radius: 16px;
+        transition: all 0.2s ease-in-out;
+        box-shadow:
+          5px 5px 20px 0px #000000,
+          -5px -5px 20px 0px #400000;
+        letter-spacing: 1px;
+        animation: login-appears 0.2s ease-out forwards;
+        opacity: 0;
+        animation-delay: 0.8s;
+
+        cursor: pointer;
+        &:hover {
+          border: solid 0.25px #7d1703bf;
+        }
+      }
+      .login-icon {
+        display: none;
+      }
+    }
+  }
+
+  @media only screen and (max-width: 1024px) {
+    .header-container {
+      padding: 12px 24px !important;
+
+      .left-side {
+        align-items: center;
+        #wuru-logo {
+          width: 120px !important;
+        }
+        gap: 40px;
+        .typo-nav {
+          display: none;
+        }
+        .icon-nav {
+          display: flex;
+          gap: 40px;
+        }
+      }
+    }
+  }
+
+  @media only screen and (max-width: 768px) {
+    .header-container {
+      .right-side {
+        .log-in-btn {
+          padding: 12px !important;
+          height: 48px;
+          width: 48px;
+          border-radius: 24px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          .login-icon {
+            display: block;
+            opacity: 0.7 !important;
+          }
+          .text {
+            display: none !important;
+          }
+        }
+      }
+    }
+  }
+</style>

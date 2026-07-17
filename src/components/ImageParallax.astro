@@ -1,0 +1,61 @@
+---
+interface Props {
+  parallaxSpeed?: number;
+  zIndex?: number;
+  layerBLur?: number;
+  horizontalParallax?: boolean;
+}
+
+const { parallaxSpeed = 0.2, zIndex = 1, layerBLur = 0, horizontalParallax = false } = Astro.props;
+---
+
+<div
+  class="parallax"
+  data-parallax-speed={parallaxSpeed}
+  data-horizontal-parallax={horizontalParallax}
+  style=`z-index: ${zIndex}; filter: blur(${layerBLur}px);`
+>
+  <slot />
+</div>
+
+<script>
+  const handleScroll = () => {
+    window.requestAnimationFrame(() => {
+      const backgrounds = document.querySelectorAll(".parallax");
+
+      backgrounds.forEach((background) => {
+        if (background instanceof HTMLElement) {
+          const rect = background.getBoundingClientRect();
+          const offsetTop = rect.top;
+
+          // Obtiene el parallaxSpeed desde el atributo data
+          const speed = parseFloat(background.dataset.parallaxSpeed || "0.2");
+          const horizontalParallax = background.dataset.horizontalParallax === "true";
+
+          if (horizontalParallax) {
+            background.style.transform = `translate3d(${-offsetTop * speed}px, 0, 0)`;
+          } else {
+            background.style.transform = `translate3d(0,${-offsetTop * speed}px,0)`;
+          }
+        }
+      });
+    });
+  };
+
+  const initScrollEffect = () => {
+    window.addEventListener("scroll", handleScroll);
+    handleScroll();
+  };
+
+  document.addEventListener("astro:page-load", initScrollEffect);
+  initScrollEffect();
+</script>
+
+<style>
+  .parallax {
+    width: 100%;
+    position: relative;
+    will-change: transform;
+    transition: transform 0.1s linear;
+  }
+</style>
