@@ -1,11 +1,12 @@
 ---
-import ScrollDown from "./ScrollDown.astro";
 import HeroText from "./HeroText.astro";
 import boxPanel from "../../assets/videos/boxpanel.webm";
 import boxPanelGif from "../../assets/videos/boxpanel-low.gif";
 ---
 
 <script>
+  import { animate, hover, press } from "motion";
+
   document.addEventListener("DOMContentLoaded", () => {
     const isSafari = () => {
       const userAgent = navigator.userAgent;
@@ -25,77 +26,179 @@ import boxPanelGif from "../../assets/videos/boxpanel-low.gif";
       }
     }
   });
+
+  const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const hero = document.querySelector(".hero");
+
+  // Springs en botones (hover + press con física)
+  if (!reduce) {
+    const springy = (sel: string) => {
+      const el = document.querySelector<HTMLElement>(sel);
+      if (!el) return;
+      hover(el, () => {
+        animate(el, { scale: 1.04 }, { type: "spring", stiffness: 400, damping: 16 });
+        return () => animate(el, { scale: 1 }, { type: "spring", stiffness: 380, damping: 22 });
+      });
+      press(el, () => {
+        animate(el, { scale: 0.96 }, { type: "spring", stiffness: 500, damping: 22 });
+        return () => animate(el, { scale: 1.04 }, { type: "spring", stiffness: 400, damping: 16 });
+      });
+    };
+    springy(".product-btn");
+    springy(".log-in-btn");
+  }
+
+  // Paso 2: al salir de INICIO el glass morphea a ancho total,
+  // y el texto del hero hace slide-out hacia la izquierda.
+  const glassEl = document.querySelector<HTMLElement>(".glass-panel");
+  const textEl = document.querySelector<HTMLElement>(".hero-text-container");
+  window.addEventListener("deckchange", (e) => {
+    const id = (e as CustomEvent).detail?.id;
+    const atHome = id === "inicio";
+    // ancho: más lento y con ease-in-out suave (smooth); texto: salida un poco más rápida
+    const widthT = { duration: 0.95, ease: [0.76, 0, 0.24, 1] as [number, number, number, number] };
+    const textT = { duration: 0.5, ease: [0.22, 1, 0.36, 1] as [number, number, number, number] };
+    const w = atHome ? "50%" : "100%";
+    if (glassEl) animate(glassEl, { width: w }, widthT);
+    if (textEl) animate(textEl, { x: atHome ? 0 : -140, opacity: atHome ? 1 : 0 }, textT);
+  });
 </script>
 
 <section class="hero">
-  <span class="top-hero">
-    <!-- GIF (hidden for others navigators) -->
-    <img id="hero-gif" src={boxPanelGif.src} alt="box gif" class="cube-img" style="display: none;" />
-    
-    <HeroText />
+  <div class="hero-stage">
+    <!-- Cubo por detrás -->
+    <div class="cube-layer">
+      <div class="cube-scrub">
+        <img id="hero-gif" src={boxPanelGif.src} alt="box gif" class="cube-img" style="display: none;" />
+        <video id="hero-video" autoplay muted loop playsinline class="cube-img" style="display: none;">
+          <source src={boxPanel} type="video/webm" />
+        </video>
+      </div>
+    </div>
 
-    <!-- Video (hidden for Safari) -->
-    <video id="hero-video" autoplay muted loop playsinline class="cube-img" style="display: none;">
-      <source src={boxPanel} type="video/webm" />
-    </video>
-
-  </span>
-  <ScrollDown scrollDownTo="#footer-container" />
+    <!-- Panel glass: mitad izquierda, el cubo se difumina por detrás -->
+    <div class="glass-panel">
+      <HeroText />
+    </div>
+  </div>
 </section>
 
 <style lang="scss">
   .hero {
+    position: relative;
     width: 100%;
-    height: 85vh;
-    max-height: 900px;
+    height: 100vh;
+    overflow: hidden;
+    scroll-snap-align: start;
+  }
+
+  .hero-stage {
+    position: absolute;
+    inset: 0;
+  }
+
+  /* Cubo detrás, corrido a la derecha para que asome del glass */
+  @keyframes cube-in {
+    from {
+      opacity: 0;
+      transform: scale(0.96);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+  @keyframes panel-in {
+    from {
+      opacity: 0;
+      transform: translateX(-24px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+  .cube-layer {
+    position: absolute;
+    inset: 0;
     display: flex;
     align-items: center;
-    justify-content: flex-start;
-    flex-direction: column;
-    position: relative;
-    gap: 48px;
-    .top-hero {
-      height: 100%;
-      display: flex;
-      align-items: center;
-      justify-content: flex-end;
-      position: relative;
-    }
+    justify-content: center;
+    z-index: 0;
+    animation: cube-in 0.8s ease-out backwards;
+  }
+  .cube-scrub {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    will-change: transform;
   }
   .cube-img {
-    padding-top: 48px;
     width: 100%;
-    max-width: 500px;
+    max-width: 620px;
     min-width: 300px;
     height: auto;
-    max-height: 75vh;
-    filter: drop-shadow(10px 10px 20px rgba(0, 0, 0, 0.2));
-    filter: brightness(0.8);
+    max-height: 80vh;
+    transform: scale(-1) translateX(-24%);
+    filter: brightness(var(--cube-brightness, 0.95));
   }
 
-  @media only screen and (max-width: 1400px) {
-    .cube-img {
-      max-width: 33vw;
-    }
+  /* Panel glass sobre la mitad izquierda */
+  .glass-panel {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 50%;
+    z-index: 20;
+    display: flex;
+    align-items: center;
+    padding-left: calc(var(--gutter) + 48px);
+    /* Glass tintado directo: el oscurecimiento va en el propio panel (sin rectángulo aparte) */
+    background:
+      linear-gradient(0deg, var(--panel-backing), var(--panel-backing)),
+      var(--glass-bg);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border-right: 1px solid var(--glass-border);
+    will-change: width;
+    animation: panel-in 0.55s cubic-bezier(0.22, 1, 0.36, 1) 0.25s backwards;
   }
 
+  /* Fallback simple para pantallas chicas (responsive fino queda para después) */
   @media only screen and (max-width: 1024px) {
-    .cube-img {
-      max-width: 50vw;
-    }
     .hero {
-      gap: 16px !important;
-      .top-hero {
-        flex-direction: column;
-        gap: 48px;
-      }
+      height: auto;
+      min-height: 90vh;
     }
-  }
-
-  @media only screen and (max-width: 768px) {
+    .hero-stage {
+      position: relative;
+      display: flex;
+      flex-direction: column-reverse;
+      align-items: center;
+      gap: 24px;
+      padding: 24px 0 48px;
+    }
+    .cube-layer {
+      position: relative;
+      inset: auto;
+    }
     .cube-img {
-      max-width: unset !important;
-      width: 80vw !important;
+      max-width: 60vw;
+      transform: none;
+    }
+    .glass-panel {
+      position: relative;
+      width: 100%;
+      height: auto;
+      padding-left: 0;
+      justify-content: center;
+      background: none;
+      border: none;
+      backdrop-filter: none;
+      -webkit-backdrop-filter: none;
+      -webkit-mask-image: none;
+      mask-image: none;
     }
   }
 </style>

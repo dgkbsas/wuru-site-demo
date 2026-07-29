@@ -1,0 +1,96 @@
+---
+// Sección de contenido del deck. Alineada a la izquierda (misma x que el hero),
+// por delante del glass fijo. Entra con deblur→nítido cuando la sección se activa.
+interface Props {
+  id: string;
+  eyebrow: string;
+  title: string;
+  paragraphs?: string[];
+}
+const { id, eyebrow, title, paragraphs = [] } = Astro.props;
+---
+
+<section class="deck-section snap-section" id={id}>
+  <div class="ds-inner">
+    <span class="ds-eyebrow">{eyebrow}</span>
+    <h2 class="ds-title">{title}</h2>
+    {paragraphs.map((p) => <p class="ds-body">{p}</p>)}
+    <slot />
+  </div>
+</section>
+
+<style lang="scss">
+  .deck-section {
+    position: relative;
+    z-index: 30; /* por delante del glass fijo (z20) */
+    display: flex;
+    align-items: center;
+    min-height: 100vh;
+    padding-left: calc(var(--gutter) + 48px);
+    padding-right: var(--gutter);
+  }
+
+  .ds-inner {
+    max-width: 760px;
+    /* base: desenfocado/oculto. Salida (al desactivarse): rápida, sin delay */
+    filter: blur(18px);
+    opacity: 0;
+    transform: translateY(18px);
+    transition:
+      filter 0.4s ease,
+      opacity 0.4s ease,
+      transform 0.4s ease;
+    will-change: filter, opacity, transform;
+  }
+
+  /* entrada (al activarse): con delay para que el glass expanda primero */
+  .deck-section.is-active .ds-inner {
+    filter: blur(0);
+    opacity: 1;
+    transform: none;
+    transition:
+      filter 0.8s cubic-bezier(0.22, 1, 0.36, 1) 0.45s,
+      opacity 0.8s ease 0.45s,
+      transform 0.8s cubic-bezier(0.22, 1, 0.36, 1) 0.45s;
+  }
+
+  .ds-eyebrow {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 20px;
+  }
+
+  .ds-title {
+    margin: 0 0 24px;
+    font-size: clamp(32px, 4.4vw, 56px);
+    font-weight: 500;
+    line-height: 1.08;
+    letter-spacing: -0.02em;
+    color: var(--fg);
+  }
+
+  .ds-body {
+    margin: 0 0 16px;
+    max-width: 640px;
+    font-size: clamp(16px, 1.25vw, 19px);
+    line-height: 1.65;
+    color: var(--fg-muted);
+  }
+
+  @media only screen and (max-width: 1024px) {
+    .deck-section {
+      padding-left: 24px;
+      padding-right: 24px;
+    }
+    .ds-inner {
+      /* en mobile no dependemos del deblur por scroll */
+      filter: none;
+      opacity: 1;
+      transform: none;
+    }
+  }
+</style>

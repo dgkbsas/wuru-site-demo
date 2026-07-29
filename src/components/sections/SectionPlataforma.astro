@@ -1,0 +1,257 @@
+---
+// Sección PLATAFORMA — ecosistema: soluciones (chips) construidas sobre la
+// plataforma (3 pilares glass). Parallax suave + revelado escalonado.
+const solutions = [
+  { icon: "🩺", label: "Cirugía" },
+  { icon: "💉", label: "Infusión" },
+  { icon: "🔎", label: "Radiología" },
+  { icon: "🗣️", label: "Pie de cama" },
+  { icon: "💲", label: "Cotización" },
+];
+const pillars = [
+  {
+    icon: "🧩",
+    title: "El flujo de trabajo",
+    text: "Estructura los datos, las reglas y el trabajo diario — con IA dentro del flujo.",
+  },
+  {
+    icon: "⚙️",
+    title: "Agentes embebidos",
+    text: "Viven dentro del flujo: ejecutan, dan soporte y automatizan, con un humano en el loop.",
+  },
+  {
+    icon: "💬",
+    title: "Agentes autónomos",
+    text: "Resuelven una tarea puntual donde ya estás — sin depender de una pantalla.",
+  },
+];
+---
+
+<section class="deck pf snap-section" id="plataforma" data-animate>
+  <div class="wrap">
+    <div class="pf-head">
+      <span class="eyebrow reveal" style="--rd: 0.04s">Una plataforma · muchos flujos de trabajo</span>
+      <h2 class="pf-title reveal" style="--rd: 0.12s">No es una solución puntual.<br />Es un ecosistema.</h2>
+      <p class="pf-sub reveal" style="--rd: 0.2s">
+        Wúru combina el flujo de trabajo, los agentes embebidos en él y los agentes autónomos a su
+        alrededor — la misma plataforma, aplicada a cada flujo clínico.
+      </p>
+    </div>
+
+    <div class="pf-eco" data-parallax="0.045">
+      <div class="pf-chips reveal" style="--rd: 0.3s">
+        {solutions.map((s) => (
+          <span class="chip">
+            <span class="chip-ico">{s.icon}</span>
+            {s.label}
+          </span>
+        ))}
+      </div>
+
+      <div class="pf-connector reveal" style="--rd: 0.4s">
+        <span class="ln"></span>
+        <span class="tag">construido sobre</span>
+        <span class="ln"></span>
+      </div>
+
+      <div class="pf-platform">
+        <p class="pf-plat-label reveal" style="--rd: 0.46s">La plataforma Wúru OS™</p>
+        <div class="pf-pillars">
+          {pillars.map((p, i) => (
+            <div class="pillar reveal" style={`--rd: ${0.54 + i * 0.09}s`}>
+              <span class="ico">{p.icon}</span>
+              <h4>{p.title}</h4>
+              <p>{p.text}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .pf {
+    position: relative;
+    display: flex;
+    align-items: center;
+    color: var(--fg);
+    z-index: 1;
+    padding: 96px 0;
+  }
+  .wrap {
+    width: 100%;
+    max-width: var(--maxw, 1280px);
+    margin: 0 auto;
+    padding: 0 var(--gutter);
+  }
+  .pf-head {
+    max-width: 760px;
+    margin: 0 auto 44px;
+    text-align: center;
+  }
+  .eyebrow {
+    display: inline-block;
+    font-size: 12.5px;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+  .pf-title {
+    margin: 16px 0 0;
+    font-size: clamp(34px, 4.6vw, 58px);
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    line-height: 1.06;
+  }
+  .pf-sub {
+    margin: 18px auto 0;
+    max-width: 640px;
+    font-size: 18px;
+    line-height: 1.5;
+    color: var(--fg-muted);
+  }
+
+  .pf-eco {
+    will-change: transform;
+  }
+  .pf-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    justify-content: center;
+  }
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    padding: 11px 18px;
+    border-radius: 100px;
+    border: 1px solid var(--glass-border);
+    background: var(--glass-bg);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    font-weight: 600;
+    font-size: 15px;
+    color: var(--fg);
+    transition:
+      border-color 0.25s ease,
+      transform 0.25s ease;
+  }
+  .chip:hover {
+    border-color: var(--accent);
+    transform: translateY(-2px);
+  }
+  .chip-ico {
+    font-size: 16px;
+  }
+
+  .pf-connector {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 20px 0;
+  }
+  .pf-connector .ln {
+    width: 1px;
+    height: 22px;
+    background: linear-gradient(var(--glass-border), var(--accent));
+  }
+  .pf-connector .tag {
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--accent);
+    border: 1px solid var(--accent);
+    border-radius: 100px;
+    padding: 5px 13px;
+    margin: 7px 0;
+  }
+
+  .pf-platform {
+    border: 1px solid color-mix(in srgb, var(--accent) 55%, transparent);
+    border-radius: 20px;
+    padding: 28px;
+    background:
+      radial-gradient(ellipse at top, color-mix(in srgb, var(--accent) 12%, transparent), transparent 68%),
+      var(--glass-bg);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+  .pf-plat-label {
+    margin: 0 0 20px;
+    text-align: center;
+    font-size: 12.5px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+  .pf-pillars {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+  }
+  .pillar {
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: 14px;
+    padding: 24px;
+    transition:
+      border-color 0.3s ease,
+      transform 0.3s ease;
+  }
+  .pillar:hover {
+    border-color: color-mix(in srgb, var(--accent) 45%, transparent);
+    transform: translateY(-3px);
+  }
+  .pillar .ico {
+    display: grid;
+    place-items: center;
+    width: 42px;
+    height: 42px;
+    border-radius: 11px;
+    background: color-mix(in srgb, var(--accent) 16%, transparent);
+    font-size: 20px;
+    margin-bottom: 14px;
+  }
+  .pillar h4 {
+    margin: 0 0 8px;
+    font-size: 18px;
+    font-weight: 600;
+  }
+  .pillar p {
+    margin: 0;
+    font-size: 14.5px;
+    line-height: 1.5;
+    color: var(--fg-muted);
+  }
+
+  /* entrada / salida escalonada */
+  .reveal {
+    opacity: 0;
+    transform: translateY(26px);
+    transition:
+      opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1),
+      transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+    transition-delay: var(--rd, 0s);
+  }
+  .pf.in-view .reveal {
+    opacity: 1;
+    transform: none;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .reveal {
+      opacity: 1;
+      transform: none;
+      transition: none;
+    }
+  }
+  @media only screen and (max-width: 860px) {
+    .pf-pillars {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

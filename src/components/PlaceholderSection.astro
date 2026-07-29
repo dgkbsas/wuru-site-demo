@@ -1,0 +1,109 @@
+---
+// Sección del deck. Dos modos:
+//  - "travel" (default): ancla vacía; el contenido lo muestra el TravelPanel
+//    (un único panel que se desliza de lado a lado entre secciones).
+//  - "card": la sección se "sale" del panel viajero y muestra su propia
+//    tarjeta centrada (el TravelPanel se oculta mientras está activa).
+interface Props {
+  id: string;
+  eyebrow: string;
+  title: string;
+  text?: string;
+  side?: "left" | "right";
+  mode?: "travel" | "card";
+}
+const { id, eyebrow, title, text = "", side = "left", mode = "travel" } = Astro.props;
+---
+
+{
+  mode === "card" ? (
+    <section class="snap-section deck-card" id={id} data-mode="card" data-animate>
+      <div class="dc-card">
+        <span class="dc-eyebrow">
+          <span class="dc-dot" />
+          {eyebrow}
+        </span>
+        <h2 class="dc-title">{title}</h2>
+        {text && <p class="dc-text">{text}</p>}
+      </div>
+    </section>
+  ) : (
+    <section
+      class="snap-section deck-anchor"
+      id={id}
+      data-mode="travel"
+      data-side={side}
+      data-eyebrow={eyebrow}
+      data-title={title}
+      data-text={text}
+    />
+  )
+}
+
+<style>
+  .deck-anchor {
+    position: relative;
+  }
+
+  /* ---- modo card ---- */
+  .deck-card {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 0 var(--gutter);
+    position: relative;
+    z-index: 1;
+  }
+  .dc-card {
+    width: min(680px, 100%);
+    padding: 56px;
+    border-radius: 24px;
+    color: var(--fg);
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    box-shadow: 0 30px 80px rgba(0, 0, 0, 0.3);
+    opacity: 0;
+    transform: translateY(40px) scale(0.98);
+    transition:
+      opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1),
+      transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .deck-card.in-view .dc-card {
+    opacity: 1;
+    transform: none;
+  }
+  .dc-eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    font-size: 12.5px;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 20px;
+  }
+  .dc-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--accent);
+  }
+  .dc-title {
+    margin: 0;
+    font-size: clamp(32px, 3.6vw, 50px);
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    line-height: 1.08;
+  }
+  .dc-text {
+    margin: 18px auto 0;
+    max-width: 520px;
+    font-size: 17px;
+    color: var(--fg-muted);
+    line-height: 1.5;
+  }
+</style>

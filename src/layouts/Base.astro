@@ -10,11 +10,11 @@ const { title } = Astro.props;
 ---
 
 <!doctype html>
-<html lang="en">
+<html lang="en" data-theme="dark">
   <head>
     <!-- Meta tags básicos -->
     <meta charset="UTF-8" />
-    <meta name="description" content="WÚRU, la plataforma para equipos de salud ágiles." />
+    <meta name="description" content="WÚRU, the operating system for healthcare operations." />
     <meta name="viewport" content="width=device-width" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="generator" content={Astro.generator} />
@@ -25,18 +25,18 @@ const { title } = Astro.props;
     <!-- Meta tag para SEO -->
     <meta
       name="description"
-      content="WÚRU, la plataforma diseñada para equipos de salud ágiles, optimizando la gestión y coordinación de los procesos médicos con herramientas innovadoras y eficientes."
+      content="WÚRU is the operating system for healthcare operations — a modular platform that structures workflows, orchestrates execution and lets AI agents operate with your institution's context, knowledge and governance."
     />
     <meta
       name="keywords"
-      content="plataforma salud, equipos de salud ágiles, gestión de salud, tecnología médica, salud digital, WÚRU, HIS, sitema operativo hospitales"
+      content="healthcare platform, healthcare operations, clinical workflows, AI agents, medical technology, digital health, WÚRU, HIS, hospital operating system"
     />
 
     <!-- Open Graph (OG) para redes sociales -->
-    <meta property="og:title" content="WÚRU, la plataforma para equipos de salud ágiles" />
+    <meta property="og:title" content="WÚRU — the operating system for healthcare operations" />
     <meta
       property="og:description"
-      content="WÚRU es la plataforma diseñada para equipos de salud ágiles, mejorando la gestión y la eficiencia en el sector médico."
+      content="A modular platform that structures workflows, orchestrates execution and enables AI agents to operate with the context, knowledge and governance of your institution."
     />
     <meta property="og:image" content="/images/wuru-logo-filled.svg" />
     <meta property="og:url" content="https://wuru.ai/" />
@@ -44,18 +44,34 @@ const { title } = Astro.props;
 
     <!-- Twitter Card para compartir en Twitter -->
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="WÚRU, la plataforma para equipos de salud ágiles" />
+    <meta name="twitter:title" content="WÚRU — the operating system for healthcare operations" />
     <meta
       name="twitter:description"
-      content="WÚRU es la plataforma diseñada para equipos de salud ágiles, mejorando la gestión y la eficiencia en el sector médico."
+      content="A modular platform that structures workflows, orchestrates execution and enables AI agents to operate with the context, knowledge and governance of your institution."
     />
     <meta name="twitter:image" content="/images/wuru-icon-152x152.png" />
     <meta name="twitter:creator" content="@wuru" />
 
     <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer is:inline></script>
+    <script is:inline>
+      // Deck: cada carga arranca desde el inicio (no restaurar scroll previo)
+      if ("scrollRestoration" in history) history.scrollRestoration = "manual";
+      window.addEventListener("load", () => window.scrollTo(0, 0));
+
+      // Anti-flash: aplica el tema y la luz guardados antes de pintar
+      try {
+        const t = localStorage.getItem("wuru-theme");
+        if (t) document.documentElement.dataset.theme = t;
+        const g = localStorage.getItem("wuru-glow");
+        if (g === "1" || g === "2" || g === "3")
+          document.documentElement.dataset.glow = g;
+      } catch (e) {}
+    </script>
   </head>
 
   <body>
+    <div class="page-bg" aria-hidden="true"></div>
+    <div class="ambient-glow" aria-hidden="true"></div>
     <slot />
   </body>
 </html>

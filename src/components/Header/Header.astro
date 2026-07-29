@@ -7,14 +7,14 @@ import SocialMediaNav from "./SocialMediaNav.astro";
 
 <header class="header-container">
   <div class="left-side">
-    <a id="wuru-logo" href="/" title="Ir al inicio de WÚRU" rel="noopener noreferrer">
+    <a id="wuru-logo" href="/" title="Go to WÚRU home" rel="noopener noreferrer">
       <Image src={WuruLogo} alt="wuru-logo" height={32} class="wuru-logo" loading={"eager"} />
     </a>
   </div>
   <div class="right-side">
     <SocialMediaNav />
-    <a class="log-in-btn" href="http://app.wuru.ai" target="_blank" title="Iniciar sesión" rel="noopener noreferrer">
-      <span class="text">INICIAR SESIÓN</span>
+    <a class="log-in-btn" href="http://app.wuru.ai" target="_blank" title="Log in" rel="noopener noreferrer">
+      <span class="text">LOG IN</span>
       <Image src={UserCircle} alt="login-icon" height={28} class="login-icon" loading={"eager"} />
     </a>
   </div>
@@ -24,32 +24,30 @@ import SocialMediaNav from "./SocialMediaNav.astro";
   @keyframes logo-in-slide {
     0% {
       opacity: 0;
-      transform: translateX(-10px);
     }
     100% {
       opacity: 1;
-      transform: translateX(0px);
     }
   }
 
   @keyframes login-appears {
     0% {
       opacity: 0;
-      transform: scale(0.9);
-    }
-    80% {
-      transform: scale(1.05);
     }
     100% {
-      transform: scale(1);
       opacity: 1;
     }
   }
 
   .header-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 50;
     width: 100%;
-    color: #f1f1f1;
-    padding: 24px 48px;
+    color: var(--fg);
+    padding: 24px var(--gutter);
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -86,7 +84,6 @@ import SocialMediaNav from "./SocialMediaNav.astro";
         }
       }
       .wuru-logo {
-        filter: drop-shadow(2px 2px 4px rgb(0, 0, 0, 0.7));
         animation: logo-in-slide 0.8s ease-out forwards;
       }
     }
@@ -96,29 +93,32 @@ import SocialMediaNav from "./SocialMediaNav.astro";
       align-items: center;
       gap: 64px;
       .log-in-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
         text-decoration: none;
-        color: #f1f1f1;
-        background-image: linear-gradient(45deg, #110e10, #1a1117, #21121d, #281319, #301a14);
-        border: solid 0.25px #7d170363;
-        padding: 8px 48px;
+        color: var(--fg);
+        background: transparent;
+        border: 1px solid var(--btn-ghost-border);
+        padding: 11px 26px;
         font-size: 12px;
-        border-radius: 16px;
-        transition: all 0.2s ease-in-out;
-        box-shadow:
-          5px 5px 20px 0px #000000,
-          -5px -5px 20px 0px #400000;
+        font-weight: 600;
+        border-radius: 100px;
         letter-spacing: 1px;
-        animation: login-appears 0.2s ease-out forwards;
+        transition: all 0.2s ease-in-out;
+        cursor: pointer;
         opacity: 0;
+        animation: login-appears 0.2s ease-out forwards;
         animation-delay: 0.8s;
 
-        cursor: pointer;
         &:hover {
-          border: solid 0.25px #7d1703bf;
+          border-color: var(--fg);
+          background: rgba(127, 127, 127, 0.1);
         }
       }
       .login-icon {
         display: none;
+        filter: var(--icon-filter, none);
       }
     }
   }

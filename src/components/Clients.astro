@@ -1,0 +1,90 @@
+---
+import { Image } from "astro:assets";
+import CAA from "../assets/images/CAA-logo.png";
+import CHSF from "../assets/images/CHSF-logo.png";
+import CUN from "../assets/images/CUN-logo.png";
+import FSFB from "../assets/images/FSFB-logo.png";
+import GG from "../assets/images/GG-logo.png";
+import HA from "../assets/images/HA-logo.png";
+import SMG from "../assets/images/SMG-logo.png";
+import auna from "../assets/images/auna-logo.png";
+import avidanti from "../assets/images/avidanti-logo.png";
+
+const logos = [
+  { src: auna, alt: "Auna" },
+  { src: avidanti, alt: "Avidanti" },
+  { src: FSFB, alt: "Fundación Santa Fe de Bogotá" },
+  { src: CUN, alt: "Clínica Universidad de Navarra" },
+  { src: SMG, alt: "Swiss Medical Group" },
+  { src: CAA, alt: "CAA" },
+  { src: CHSF, alt: "CHSF" },
+  { src: GG, alt: "GG" },
+  { src: HA, alt: "HA" },
+];
+---
+
+<div class="clients">
+  <span class="clients-label">Trusted by leading healthcare institutions</span>
+  <ul class="clients-row">
+    {
+      logos.map((l) => (
+        <li>
+          <Image src={l.src} alt={l.alt} height={38} class="client-logo" loading="lazy" />
+        </li>
+      ))
+    }
+  </ul>
+  {/* TODO: partnerships — falta contenido/assets reales (nombres o logos de partners) */}
+  <span class="partners-note">In partnership with leading teams in AI &amp; healthcare</span>
+</div>
+
+<style>
+  .clients {
+    margin-top: 44px;
+  }
+  .clients-label,
+  .partners-note {
+    display: block;
+    font-size: 12px;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    color: var(--fg-muted);
+    opacity: 0.85;
+  }
+  .clients-row {
+    list-style: none;
+    margin: 18px 0 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 32px 40px;
+  }
+  .clients-row li {
+    display: flex;
+    align-items: center;
+  }
+  .client-logo {
+    height: 34px;
+    width: auto;
+    filter: var(--logo-filter, none);
+    opacity: 0.55;
+    transition: opacity 0.25s ease;
+  }
+  .client-logo:hover {
+    opacity: 0.9;
+  }
+  .partners-note {
+    margin-top: 40px;
+    opacity: 0.6;
+  }
+
+  @media only screen and (max-width: 1024px) {
+    .clients-row {
+      gap: 22px 28px;
+    }
+    .client-logo {
+      height: 26px;
+    }
+  }
+</style>

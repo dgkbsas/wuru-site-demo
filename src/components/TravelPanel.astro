@@ -1,0 +1,145 @@
+---
+// Panel único que "viaja": según la sección activa (modo travel) se desliza
+// al lado que corresponde y cambia su contenido. Se oculta en el hero y en
+// secciones modo "card".
+---
+
+<div class="travel-panel" aria-hidden="true">
+  <div class="tp-content">
+    <span class="tp-eyebrow"><span class="tp-dot"></span><span class="tp-eyebrow-text"></span></span>
+    <h2 class="tp-title"></h2>
+    <p class="tp-text"></p>
+  </div>
+</div>
+
+<script>
+  const panel = document.querySelector<HTMLElement>(".travel-panel");
+  if (panel) {
+    const eEyebrow = panel.querySelector<HTMLElement>(".tp-eyebrow-text")!;
+    const eTitle = panel.querySelector<HTMLElement>(".tp-title")!;
+    const eText = panel.querySelector<HTMLElement>(".tp-text")!;
+
+    const apply = (a: HTMLElement) => {
+      eEyebrow.textContent = a.dataset.eyebrow || "";
+      eTitle.textContent = a.dataset.title || "";
+      eText.textContent = a.dataset.text || "";
+    };
+    const show = (a: HTMLElement) => {
+      const side = a.dataset.side === "right" ? "right" : "left";
+      const firstTime = !panel.classList.contains("visible");
+      if (firstTime) {
+        apply(a);
+        panel.classList.remove("left", "right");
+        panel.classList.add(side, "visible");
+      } else {
+        // crossfade del contenido + slide al nuevo lado
+        panel.classList.add("swapping");
+        window.setTimeout(() => {
+          apply(a);
+          panel.classList.remove("left", "right");
+          panel.classList.add(side);
+          panel.classList.remove("swapping");
+        }, 250);
+      }
+    };
+    const hide = () => panel.classList.remove("visible");
+
+    const sections = document.querySelectorAll<HTMLElement>(".deck-anchor, .deck-card, .hero");
+    const io = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((e) => {
+          if (!e.isIntersecting) return;
+          if (e.target.classList.contains("deck-anchor")) show(e.target as HTMLElement);
+          else hide();
+        });
+      },
+      { threshold: 0.5 }
+    );
+    sections.forEach((s) => io.observe(s));
+  }
+</script>
+
+<style>
+  .travel-panel {
+    --tp-w: min(540px, 42vw);
+    position: fixed;
+    top: 50%;
+    left: var(--gutter);
+    width: var(--tp-w);
+    transform: translateY(-50%);
+    padding: 48px;
+    border-radius: 22px;
+    color: var(--fg);
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    box-shadow: 0 30px 80px rgba(0, 0, 0, 0.3);
+    z-index: 30;
+    opacity: 0;
+    pointer-events: none;
+    transition:
+      left 0.6s cubic-bezier(0.22, 1, 0.36, 1),
+      opacity 0.5s ease;
+  }
+  .travel-panel.visible {
+    opacity: 1;
+  }
+  .travel-panel.left {
+    left: var(--gutter);
+  }
+  .travel-panel.right {
+    left: calc(100vw - var(--tp-w) - var(--gutter));
+    text-align: right;
+  }
+  .travel-panel.right .tp-eyebrow {
+    flex-direction: row-reverse;
+  }
+  .tp-content {
+    transition: opacity 0.25s ease;
+  }
+  .travel-panel.swapping .tp-content {
+    opacity: 0;
+  }
+  .tp-eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    font-size: 12.5px;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 20px;
+  }
+  .tp-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--accent);
+  }
+  .tp-title {
+    margin: 0;
+    font-size: clamp(30px, 3.2vw, 44px);
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+  }
+  .tp-text {
+    margin-top: 18px;
+    font-size: 17px;
+    color: var(--fg-muted);
+    line-height: 1.5;
+  }
+
+  @media only screen and (max-width: 1024px) {
+    .travel-panel,
+    .travel-panel.left,
+    .travel-panel.right {
+      left: 50%;
+      width: min(520px, 88vw);
+      transform: translate(-50%, -50%);
+      text-align: left;
+    }
+  }
+</style>

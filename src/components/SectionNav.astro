@@ -1,0 +1,187 @@
+---
+// Indicador de progreso vertical (derecha): línea fina + thumb accent que se
+// desliza a la sección activa, con el label de la activa al lado. Sin dots.
+const sections = [
+  { id: "inicio", label: "HOME" },
+  { id: "wuru", label: "WÚRU" },
+  { id: "plataforma", label: "PLATFORM" },
+  { id: "smart-workflows", label: "SMART WORKFLOWS" },
+  { id: "embedded-agents", label: "EMBEDDED AGENTS" },
+  { id: "standalone-agents", label: "STANDALONE AGENTS" },
+];
+---
+
+<nav class="section-nav" aria-label="Sections">
+  <span class="sn-current" aria-hidden="true"></span>
+  <span class="sn-track"></span>
+  <span class="sn-thumb"></span>
+  <ul class="sn-hits">
+    {
+      sections.map((s) => (
+        <li>
+          <button type="button" data-target={s.id} aria-label={s.label} />
+        </li>
+      ))
+    }
+  </ul>
+</nav>
+
+<script>
+  const nav = document.querySelector<HTMLElement>(".section-nav");
+  const track = nav?.querySelector<HTMLElement>(".sn-track");
+  const thumb = nav?.querySelector<HTMLElement>(".sn-thumb");
+  const current = nav?.querySelector<HTMLElement>(".sn-current");
+  const hits = Array.from(nav?.querySelectorAll<HTMLButtonElement>("button[data-target]") ?? []);
+  const sections = hits.map((b) => ({ id: b.dataset.target ?? "", label: b.getAttribute("aria-label") ?? "" }));
+  let idx = 0;
+
+  const layout = (animated = true) => {
+    if (!track || !thumb || !current || !sections.length) return;
+    const H = track.clientHeight;
+    const n = sections.length;
+    const slot = H / n;
+    const thumbH = slot * 0.6;
+    const y = idx * slot + (slot - thumbH) / 2;
+
+    if (!animated) {
+      thumb.style.transition = "none";
+      current.style.transition = "none";
+    }
+    thumb.style.height = `${thumbH}px`;
+    thumb.style.transform = `translateY(${y}px)`;
+    current.textContent = sections[idx].label;
+    const labelY = y + thumbH / 2 - current.offsetHeight / 2;
+    current.style.transform = `translateY(${labelY}px)`;
+    if (!animated) {
+      // reactivar transición en el próximo frame
+      requestAnimationFrame(() => {
+        thumb.style.transition = "";
+        current.style.transition = "";
+      });
+    }
+  };
+
+  const setActive = (id: string) => {
+    const i = sections.findIndex((s) => s.id === id);
+    if (i < 0 || i === idx) return;
+    idx = i;
+    layout(true);
+  };
+
+  // Sincronía con el deck
+  window.addEventListener("deckchange", (e) => {
+    const id = (e as CustomEvent).detail?.id;
+    if (id) setActive(id);
+  });
+
+  // Click en el track → navega el deck
+  hits.forEach((b) => {
+    b.addEventListener("click", () => {
+      const id = b.dataset.target;
+      if (id) window.dispatchEvent(new CustomEvent("decknav", { detail: { id } }));
+    });
+  });
+
+  // Posición inicial (sin animar) + recomputar en resize
+  requestAnimationFrame(() => layout(false));
+  window.addEventListener("resize", () => layout(false));
+</script>
+
+<style>
+  .section-nav {
+    position: fixed;
+    right: 56px;
+    top: 50%;
+    transform: translateY(-50%);
+    height: 54vh;
+    max-height: 520px;
+    width: 180px;
+    z-index: 60;
+    pointer-events: none;
+    animation: sn-fade 0.7s ease 0.3s backwards;
+  }
+  @keyframes sn-fade {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  /* línea de fondo (track) */
+  .sn-track {
+    position: absolute;
+    right: 8px;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    border-radius: 2px;
+    background: var(--fg-muted);
+    opacity: 0.22;
+  }
+
+  /* thumb accent que se desliza a la sección activa */
+  .sn-thumb {
+    position: absolute;
+    right: 7px;
+    top: 0;
+    width: 4px;
+    border-radius: 4px;
+    background: var(--accent);
+    transition:
+      transform 0.55s cubic-bezier(0.22, 1, 0.36, 1),
+      height 0.3s ease;
+    will-change: transform;
+  }
+
+  /* label de la sección activa, a la izquierda del track, sigue al thumb */
+  .sn-current {
+    position: absolute;
+    right: 24px;
+    top: 0;
+    font-size: 11px;
+    letter-spacing: 1.2px;
+    font-weight: 600;
+    color: var(--accent);
+    white-space: nowrap;
+    text-align: right;
+    transform-origin: right center;
+    transition: transform 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+    /* el ancho lo da el texto, anclado por la derecha */
+    left: auto;
+  }
+
+  /* zonas invisibles clickeables (una por sección) sobre el track */
+  .sn-hits {
+    position: absolute;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    width: 40px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+  }
+  .sn-hits li {
+    flex: 1;
+  }
+  .sn-hits button {
+    width: 100%;
+    height: 100%;
+    padding: 0;
+    margin: 0;
+    background: none;
+    border: 0;
+    cursor: pointer;
+    pointer-events: auto;
+  }
+
+  @media only screen and (max-width: 1024px) {
+    .section-nav {
+      display: none;
+    }
+  }
+</style>

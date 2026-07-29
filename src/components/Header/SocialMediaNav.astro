@@ -75,13 +75,14 @@ import Policy from "../../assets/images/privacy-policy-icon.svg";
 
     img {
       opacity: 0.5;
+      filter: var(--icon-filter, none);
       animation: icons-appears-nav 0.5s ease-out forwards;
       transition: all 0.2s ease-in-out;
       cursor: pointer;
 
       &:hover {
         opacity: 1 !important;
-        filter: drop-shadow(0 0 4px rgba(255, 255, 255, 0.66));
+        filter: var(--icon-filter, none) drop-shadow(0 0 4px rgba(150, 150, 150, 0.6));
       }
     }
   }

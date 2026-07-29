@@ -1,13 +1,104 @@
-:root {
-  --accent: 136, 58, 234;
-  --accent-light: 224, 204, 250;
-  --accent-dark: 49, 10, 101;
-  --accent-gradient: linear-gradient(
-    45deg,
-    rgb(var(--accent)),
-    rgb(var(--accent-light)) 30%,
-    white 60%
-  );
+/* ===== Temas (switcher) ===== */
+:root,
+[data-theme="dark"] {
+  --page-bg: linear-gradient(90deg, #360124, #290a24, #1d0e21, #150f1a, #0e0e0e);
+  /* margen lateral que cap­a el contenido a un ancho máx (1600px), sin tocar bg/glass */
+  --gutter: max(48px, calc((100vw - 1600px) / 2));
+  --fg: #f1f1f1;
+  --fg-muted: rgba(241, 241, 241, 0.66);
+  --accent: #ec5a3d;
+  --glass-bg: rgba(255, 255, 255, 0.06);
+  --glass-border: rgba(255, 255, 255, 0.12);
+  --btn-ghost-border: rgba(241, 241, 241, 0.28);
+  --panel-backing: rgba(0, 0, 0, 0.35);
+  /* logos de clientes en monocromo (blancos sobre fondo oscuro) */
+  --logo-filter: brightness(0) invert(1);
+}
+
+/* Oscuro azulado (medianoche) */
+[data-theme="midnight"] {
+  --page-bg: linear-gradient(100deg, #141a44, #10112e, #0d0b1c, #0a0a12);
+  --fg: #eef0f8;
+  --fg-muted: rgba(238, 240, 248, 0.66);
+  --accent: #ff6344;
+  --glass-bg: rgba(255, 255, 255, 0.06);
+  --glass-border: rgba(255, 255, 255, 0.12);
+  --btn-ghost-border: rgba(238, 240, 248, 0.28);
+}
+
+/* Oscuro teal (tono del cubo) */
+[data-theme="teal"] {
+  --page-bg: linear-gradient(120deg, #093c34, #0a2a28, #0b1a1a, #08100f);
+  --fg: #eef5f2;
+  --fg-muted: rgba(238, 245, 242, 0.66);
+  --accent: #ff6344;
+  --glass-bg: rgba(255, 255, 255, 0.06);
+  --glass-border: rgba(255, 255, 255, 0.12);
+  --btn-ghost-border: rgba(238, 245, 242, 0.28);
+}
+
+/* Oscuro con luz suave desde la izquierda (menos lumínica) */
+[data-theme="dawn"] {
+  --page-bg:
+    radial-gradient(115% 115% at -5% 42%, rgba(236, 90, 61, 0.16), transparent 45%),
+    linear-gradient(90deg, #240a1c, #1a0d1e, #150f1a, #0e0e0e);
+  --fg: #f6f1ee;
+  --fg-muted: rgba(246, 241, 238, 0.66);
+  --accent: #ff6344;
+  --glass-bg: rgba(255, 255, 255, 0.06);
+  --glass-border: rgba(255, 255, 255, 0.12);
+  --btn-ghost-border: rgba(246, 241, 238, 0.28);
+}
+
+/* Claro rosa / violeta */
+[data-theme="light"] {
+  --page-bg: linear-gradient(120deg, #f2d6e8 0%, #e7c6e6 45%, #d9c5f1 100%);
+  --fg: #26101d;
+  --fg-muted: rgba(38, 16, 29, 0.62);
+  --accent: #c0392b;
+  --glass-bg: rgba(40, 12, 30, 0.08);
+  --glass-border: rgba(40, 12, 30, 0.14);
+  --btn-ghost-border: rgba(38, 16, 29, 0.28);
+  --panel-backing: rgba(20, 8, 16, 0.06);
+  --cube-brightness: 1.05;
+  --icon-filter: brightness(0);
+  --logo-filter: brightness(0);
+}
+
+/* Claro que oscurece mínimamente hacia arriba-derecha */
+[data-theme="light-tr"] {
+  --page-bg:
+    radial-gradient(80% 80% at 100% 0%, rgba(40, 18, 32, 0.2), transparent 55%),
+    linear-gradient(135deg, #f7e8f0, #efdff0);
+  --fg: #26101d;
+  --fg-muted: rgba(38, 16, 29, 0.62);
+  --accent: #c0392b;
+  --glass-bg: rgba(40, 12, 30, 0.08);
+  --glass-border: rgba(40, 12, 30, 0.14);
+  --btn-ghost-border: rgba(38, 16, 29, 0.28);
+  --panel-backing: rgba(20, 8, 16, 0.06);
+  --cube-brightness: 1.05;
+  --icon-filter: brightness(0);
+  --logo-filter: brightness(0);
+}
+
+/* Claro con manchas magenta/rojo difuminadas (mesh) */
+[data-theme="blush"] {
+  --page-bg:
+    radial-gradient(60% 55% at 6% 102%, rgba(198, 42, 90, 0.62), transparent 60%),
+    radial-gradient(45% 45% at 102% 92%, rgba(190, 40, 70, 0.3), transparent 55%),
+    radial-gradient(55% 55% at 90% 2%, rgba(130, 70, 150, 0.16), transparent 60%),
+    linear-gradient(180deg, #edeaee, #e6e1e6 55%, #ddd6dd);
+  --fg: #241019;
+  --fg-muted: rgba(36, 16, 25, 0.6);
+  --accent: #c62a5a;
+  --glass-bg: rgba(40, 12, 30, 0.06);
+  --glass-border: rgba(40, 12, 30, 0.12);
+  --btn-ghost-border: rgba(36, 16, 25, 0.26);
+  --panel-backing: rgba(20, 8, 16, 0.05);
+  --cube-brightness: 1.05;
+  --icon-filter: brightness(0);
+  --logo-filter: brightness(0);
 }
 
 * {
@@ -18,7 +109,8 @@
 }
 
 html {
-  background-image: linear-gradient(90deg, #360124, #290a24, #1d0e21, #150f1a, #0e0e0e);
+  /* fallback estático detrás de la capa fija .page-bg (que es la que se ve) */
+  background: var(--page-bg);
   height: 100%;
   width: 100%;
   min-width: 340px;
@@ -40,16 +132,21 @@ html {
   justify-content: center;
   margin: 0;
   scroll-behavior: smooth;
+  /* snap: siempre asienta en una sección (nunca a medio camino) */
+  scroll-snap-type: y mandatory;
 }
+
+.snap-section {
+  min-height: 100vh;
+  scroll-snap-align: start;
+}
+
 
 body {
   margin: 0;
   height: max-content;
   width: 100%;
-  max-width: 1800px;
-  background-image: radial-gradient(#932020c2 0.71px, rgba(255,0,0,0) 0.71px);
-  background-size: 24px 24px;
-  background-attachment: fixed;
+  background: transparent;
   position: relative;
 }
 
@@ -57,4 +154,38 @@ a{
   text-decoration: none;
   border: none;
 
+}
+
+/* Fondo real: capa fija al viewport (no scrollea nunca) */
+.page-bg {
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  pointer-events: none;
+  background: var(--page-bg);
+}
+
+/* Luz magenta ambiental desde la derecha (toggle: data-glow="on") */
+.ambient-glow {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.6s ease;
+  background: radial-gradient(
+    55% 150% at 100% 50%,
+    rgba(214, 40, 120, 0.3),
+    rgba(214, 40, 120, 0.12) 42%,
+    transparent 72%
+  );
+}
+:root[data-glow="1"] .ambient-glow {
+  opacity: 0.4;
+}
+:root[data-glow="2"] .ambient-glow {
+  opacity: 0.7;
+}
+:root[data-glow="3"] .ambient-glow {
+  opacity: 1;
 }

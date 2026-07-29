@@ -1,0 +1,168 @@
+---
+// Switcher de temas. Guarda la elección en localStorage.
+---
+
+<div class="theme-switcher" role="group" aria-label="Change theme">
+  <button class="theme-dot t-dark" data-theme-value="dark" title="Dark plum" aria-label="Dark plum theme"></button>
+  <button class="theme-dot t-midnight" data-theme-value="midnight" title="Midnight" aria-label="Midnight theme"></button>
+  <button class="theme-dot t-teal" data-theme-value="teal" title="Teal" aria-label="Teal theme"></button>
+  <button class="theme-dot t-dawn" data-theme-value="dawn" title="Soft light" aria-label="Soft light theme"></button>
+  <button class="theme-dot t-light" data-theme-value="light" title="Light pink" aria-label="Light pink theme"></button>
+  <button class="theme-dot t-lighttr" data-theme-value="light-tr" title="Light" aria-label="Light theme"></button>
+  <button class="theme-dot t-blush" data-theme-value="blush" title="Light magenta" aria-label="Light magenta theme"></button>
+  <span class="sw-divider"></span>
+  <span class="glow-levels" role="group" aria-label="Magenta light brightness">
+    <button class="glow-level lvl1" data-glow-value="1" title="Soft light" aria-label="Soft light"></button>
+    <button class="glow-level lvl2" data-glow-value="2" title="Medium light" aria-label="Medium light"></button>
+    <button class="glow-level lvl3" data-glow-value="3" title="Strong light" aria-label="Strong light"></button>
+  </span>
+</div>
+
+<script>
+  const KEY = "wuru-theme";
+  const root = document.documentElement;
+
+  const saved = localStorage.getItem(KEY);
+  if (saved) root.dataset.theme = saved;
+
+  const sync = () => {
+    const cur = root.dataset.theme || "dark";
+    document.querySelectorAll<HTMLButtonElement>(".theme-dot").forEach((d) => {
+      d.classList.toggle("active", d.getAttribute("data-theme-value") === cur);
+    });
+  };
+
+  document.querySelectorAll<HTMLButtonElement>(".theme-dot").forEach((dot) => {
+    dot.addEventListener("click", () => {
+      const val = dot.getAttribute("data-theme-value");
+      if (!val) return;
+      root.dataset.theme = val;
+      try {
+        localStorage.setItem(KEY, val);
+      } catch (e) {}
+      sync();
+    });
+  });
+
+  sync();
+
+  // Luz magenta ambiental — 3 niveles de brillo (click en el activo apaga)
+  const glowLevels = Array.from(document.querySelectorAll<HTMLButtonElement>(".glow-level"));
+  const savedGlow = localStorage.getItem("wuru-glow");
+  if (savedGlow === "1" || savedGlow === "2" || savedGlow === "3") root.dataset.glow = savedGlow;
+  const syncGlow = () => {
+    const cur = root.dataset.glow || "";
+    glowLevels.forEach((b) => b.classList.toggle("active", b.dataset.glowValue === cur));
+  };
+  glowLevels.forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const val = btn.dataset.glowValue;
+      if (!val) return;
+      const isOff = root.dataset.glow === val;
+      if (isOff) delete root.dataset.glow;
+      else root.dataset.glow = val;
+      try {
+        localStorage.setItem("wuru-glow", isOff ? "off" : val);
+      } catch (e) {}
+      syncGlow();
+    });
+  });
+  syncGlow();
+</script>
+
+<style>
+  .theme-switcher {
+    position: fixed;
+    top: 26px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 200;
+    display: flex;
+    gap: 10px;
+    padding: 8px 12px;
+    border-radius: 100px;
+    background: rgba(127, 127, 127, 0.12);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 1px solid rgba(127, 127, 127, 0.22);
+  }
+  .theme-dot {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    cursor: pointer;
+    padding: 0;
+    transition:
+      transform 0.15s ease,
+      box-shadow 0.15s ease;
+  }
+  .theme-dot:hover {
+    transform: scale(1.18);
+  }
+  .theme-dot.active {
+    box-shadow: 0 0 0 2px rgba(127, 127, 127, 0.55);
+    transform: scale(1.1);
+  }
+  .t-dark {
+    background: linear-gradient(135deg, #360124, #0e0e0e);
+  }
+  .t-midnight {
+    background: linear-gradient(135deg, #1a1e46, #0a0a12);
+  }
+  .t-teal {
+    background: linear-gradient(135deg, #0a3b34, #08110f);
+  }
+  .t-dawn {
+    background: radial-gradient(circle at 28% 42%, #c8492f, #1a0d1e);
+  }
+  .t-light {
+    background: linear-gradient(135deg, #f2d6e8, #d9c5f1);
+  }
+  .t-lighttr {
+    background: linear-gradient(225deg, #3a2436 22%, #f6e6ee);
+  }
+  .t-blush {
+    background: radial-gradient(circle at 32% 78%, #c62a5a, #ede9ed 78%);
+  }
+  .sw-divider {
+    width: 1px;
+    height: 16px;
+    background: rgba(127, 127, 127, 0.3);
+    margin: 0 2px;
+  }
+  .glow-levels {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+  }
+  .glow-level {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    border: 1px solid rgba(214, 40, 120, 0.5);
+    cursor: pointer;
+    padding: 0;
+    transition:
+      transform 0.15s ease,
+      box-shadow 0.2s ease,
+      background 0.2s ease;
+  }
+  .glow-level.lvl1 {
+    background: rgba(214, 40, 120, 0.2);
+  }
+  .glow-level.lvl2 {
+    background: rgba(214, 40, 120, 0.45);
+  }
+  .glow-level.lvl3 {
+    background: rgba(214, 40, 120, 0.75);
+  }
+  .glow-level:hover {
+    transform: scale(1.2);
+  }
+  .glow-level.active {
+    background: radial-gradient(circle, #ff3ea0, #d62878);
+    border-color: #ff3ea0;
+    box-shadow: 0 0 8px rgba(214, 40, 120, 0.85);
+  }
+</style>

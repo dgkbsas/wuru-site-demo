@@ -32,7 +32,7 @@ import WuruLogo from "../assets/images/wuru-logo.svg";
         });
 
         if (res.ok) {
-          messageBox.textContent = "✓ ¡Enviado correctamente!";
+          messageBox.textContent = "✓ Sent successfully!";
           messageBox.className = "form-message success visible";
           setTimeout(() => {
             messageBox.className = "form-message hidden";
@@ -40,12 +40,12 @@ import WuruLogo from "../assets/images/wuru-logo.svg";
             window.location.href = "/";
           }, 1500);
         } else {
-          messageBox.textContent = "✕ Falló la verificación.";
+          messageBox.textContent = "✕ Verification failed.";
           messageBox.className = "form-message error visible";
         }
       } catch (error) {
         console.error("Error al crear lead:", error);
-        messageBox.textContent = "✕ Ocurrió un error. Intenta de nuevo.";
+        messageBox.textContent = "✕ Something went wrong. Please try again.";
         messageBox.className = "form-message error visible";
       } finally {
         submitBtn.disabled = false;
@@ -62,32 +62,32 @@ import WuruLogo from "../assets/images/wuru-logo.svg";
           <Image src={WuruLogo} alt="wuru-logo" height={28} class="wuru-logo" loading={"eager"} />
           <h2 class="subtitle">Onboarding</h2>
         </span>
-        <a class="back-btn" id="back-btn" href="/" target="_self" title="Volver a wúru" rel="noopener noreferrer"> ← </a>
-        <p class="sub-title">La plataforma para equipos de salud ágiles.</p>
+        <a class="back-btn" id="back-btn" href="/" target="_self" title="Back to Wúru" rel="noopener noreferrer"> ← </a>
+        <p class="sub-title">The operating system for healthcare operations.</p>
       </header>
       <main class="content">
         <section class="section" id="section-newsletter">
           <form action="contact-form" class="form-newsletter" id="contact-form">
-            <p class="section-description">Recibe noticias periódicas y mantente al tanto de las novedades de nuestros productos.</p>
+            <p class="section-description">Get regular news and stay up to date with our product updates.</p>
             <p class="section-description" style="margin-bottom: 16px;">
-              Al registrarte, aceptas recibir correos electrónicos de WÚRU. Puedes darte de baja en cualquier momento.
+              By signing up, you agree to receive emails from WÚRU. You can unsubscribe at any time.
             </p>
 
-            <label for="name">Nombre y apellido <span style="font-size: 12px; opacity: 0.4; margin-left: 4px;">(obligatorio)</span></label>
+            <label for="name">Full name <span style="font-size: 12px; opacity: 0.4; margin-left: 4px;">(required)</span></label>
             <input type="text" id="name" name="name" placeholder="Luciano Tourn" required />
 
-            <label for="email">Correo electrónico <span style="font-size: 12px; opacity: 0.4; margin-left: 4px;">(obligatorio)</span></label>
-            <input type="email" id="email" name="email" placeholder="Luciano@wuru.ai" required />
+            <label for="email">Email <span style="font-size: 12px; opacity: 0.4; margin-left: 4px;">(required)</span></label>
+            <input type="email" id="email" name="email" placeholder="luciano@wuru.ai" required />
 
-            <label for="companyName">Institución</label>
-            <input type="text" id="companyName" name="companyName" placeholder="Clínica wúru" />
+            <label for="companyName">Institution</label>
+            <input type="text" id="companyName" name="companyName" placeholder="Wúru Clinic" />
 
             <span class="message-container">
               <div id="form-message" class="form-message hidden"></div>
             </span>
 
             <div class="form-footer">
-              <button type="submit" class="submit-btn">Enviar</button>
+              <button type="submit" class="submit-btn">Submit</button>
             </div>
 
             <div class="cf-turnstile" data-sitekey={import.meta.env.PUBLIC_TURNSTILE_SITE_KEY}></div>

@@ -1,14 +1,104 @@
 ---
 import Layout from "../layouts/Base.astro";
+import ThemeSwitcher from "../components/ThemeSwitcher.astro";
+import SectionNav from "../components/SectionNav.astro";
 import Header from "../components/Header/Header.astro";
-import FloatingHeader from "../components/Header/FloatingHeader.astro";
 import Hero from "../components/Hero/Hero.astro";
+import DeckSection from "../components/DeckSection.astro";
+import Clients from "../components/Clients.astro";
 import Footer from "../components/Footer/Footer.astro";
 ---
 
 <Layout title="Wúru">
+  <ThemeSwitcher />
+  <SectionNav />
   <Header />
-  <FloatingHeader />
+
   <Hero />
+
+  <DeckSection
+    id="wuru"
+    eyebrow="Wúru"
+    title="Wúru is the operating system for healthcare operations."
+    paragraphs={[
+      "Every interaction expands what your teams can delegate while keeping people at the center of every decision.",
+    ]}
+  >
+    <Clients />
+  </DeckSection>
+
+  <DeckSection
+    id="plataforma"
+    eyebrow="Platform"
+    title="Modular by design."
+    paragraphs={[
+      "A modular platform that structures workflows, orchestrates execution and enables AI agents to operate with the context, knowledge and governance of your institution.",
+    ]}
+  />
+
+  <DeckSection
+    id="smart-workflows"
+    eyebrow="Smart Workflows"
+    title="Workflows are the operational foundation of Wúru."
+    paragraphs={[
+      "They structure institutional processes into digital workflows that define responsibilities, permissions, business rules and shared knowledge.",
+      "Every workflow lives in the cloud, evolves with your institution and creates a single operational source of truth that connects people, systems and AI agents.",
+    ]}
+  />
+
+  <DeckSection
+    id="embedded-agents"
+    eyebrow="Embedded Agents"
+    title="Embedded agents operate within the workflow."
+    paragraphs={[
+      "They are invoked at the right moment to structure information, summarize, recommend, predict and execute operational tasks.",
+      "Every agent works with the workflow's context, permissions, tools and institutional knowledge, allowing it to assist naturally within the daily operation.",
+    ]}
+  />
+
+  <DeckSection
+    id="standalone-agents"
+    eyebrow="Standalone Agents"
+    title="Standalone agents specialize in complete professional tasks."
+    paragraphs={[
+      "They interact directly with users, understand institutional context and deliver outcomes aligned with your organization's principles, standards and style.",
+      "From clinical documentation to operational analysis, professionals simply describe what they need, delegate execution and supervise the result.",
+    ]}
+  />
+
   <Footer />
 </Layout>
+
+<script>
+  // Sincronía del picker + deblur de secciones con el scroll
+  const io = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((e) => {
+        if (!e.isIntersecting) return;
+        const id = (e.target as HTMLElement).classList.contains("hero") ? "inicio" : e.target.id;
+        if (id) window.dispatchEvent(new CustomEvent("deckchange", { detail: { id } }));
+      });
+    },
+    { threshold: 0.5 }
+  );
+  document
+    .querySelectorAll(".hero, #wuru, #plataforma, #smart-workflows, #embedded-agents, #standalone-agents")
+    .forEach((el) => io.observe(el));
+
+  // Deblur → nítido del contenido de la sección activa
+  const deckSections = document.querySelectorAll<HTMLElement>(".deck-section");
+  window.addEventListener("deckchange", (e) => {
+    const id = (e as CustomEvent).detail?.id;
+    deckSections.forEach((s) => s.classList.toggle("is-active", s.id === id));
+  });
+
+  // Click en el picker → scroll suave a la sección
+  window.addEventListener("decknav", (e) => {
+    const id = (e as CustomEvent).detail?.id;
+    if (id === "inicio") {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    } else {
+      document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
+    }
+  });
+</script>
