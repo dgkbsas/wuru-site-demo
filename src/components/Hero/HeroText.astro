@@ -3,13 +3,13 @@ import HeroTextChanging from "./HeroTextChanging.astro";
 ---
 
 <div class="hero-text-container">
-  <span class="hero-badge">
+  <span class="hero-badge hl-line" style="--i: 0">
     <span class="live-dot"></span>
     Agentic operating platform for healthcare
   </span>
-  <HeroTextChanging />
-  <h1>Healthcare workflows</h1>
-  <h3 class="tagline-1">
+  <div class="hl-line" style="--i: 1"><HeroTextChanging /></div>
+  <h1 class="hl-line" style="--i: 2">Healthcare work</h1>
+  <h3 class="tagline-1 hl-line" style="--i: 3">
     <svg class="wuru-mark" viewBox="0 0 109 27" role="img" aria-label="WÚRU" xmlns="http://www.w3.org/2000/svg">
       <path d="M51.7091 3.97989C51.5225 4.45206 51.2155 4.86787 50.8183 5.18651C50.5674 5.38104 50.2586 5.48707 49.9403 5.48791H45.6641L49.6245 0L50.0983 0.207209C50.5696 0.40174 50.982 0.714754 51.2949 1.11553C51.6078 1.51631 51.8105 1.99108 51.8832 2.49324C51.9558 2.99541 51.8958 3.50772 51.7091 3.97989Z" fill="currentColor"/>
       <path d="M52.547 8.91995V16.8316C52.547 18.6525 52.149 20.0025 51.3531 20.8313C50.8906 21.2686 50.3421 21.6058 49.742 21.822C49.1419 22.0381 48.5033 22.1284 47.8664 22.0872C44.7082 22.0872 43.1859 20.4232 43.1859 16.8504V8.68762C43.1875 8.24347 43.1011 7.80335 42.9314 7.39246C42.7618 6.98156 42.5123 6.60795 42.1972 6.29302C41.8822 5.97808 41.5078 5.72799 41.0954 5.55707C40.683 5.38615 40.2407 5.29775 39.7939 5.29692H37.1094V17.0074C37.1094 20.1909 38.0695 22.6586 39.9581 24.4104C41.8468 26.1623 44.4871 27.0037 47.8348 27.0037C51.1826 27.0037 53.8355 26.1309 55.7116 24.4104C57.5876 22.6899 58.5666 20.1909 58.5666 17.0074V5.29692H56.2169C55.7364 5.29444 55.2601 5.38628 54.8154 5.56717C54.3706 5.74805 53.9662 6.01443 53.6252 6.35102C53.2843 6.68762 53.0135 7.08781 52.8285 7.52864C52.6435 7.96947 52.5478 8.44228 52.547 8.91995Z" fill="currentColor"/>
@@ -18,9 +18,9 @@ import HeroTextChanging from "./HeroTextChanging.astro";
       <path d="M24.2049 19.0575L28.0833 7.32823C28.2701 6.73554 28.6421 6.21749 29.1453 5.84937C29.6485 5.48125 30.2567 5.28224 30.8815 5.28125H34.3556L28.0391 24.4889C27.8073 25.2164 27.3489 25.8517 26.7301 26.3032C26.1113 26.7547 25.3641 26.9989 24.5966 27.0006H24.167C23.3467 26.9995 22.5469 26.7451 21.8782 26.2727C21.2094 25.8003 20.7048 25.1331 20.434 24.3633L17.3894 15.6982L13.8964 24.6522C13.6247 25.341 13.1514 25.933 12.5377 26.3516C11.924 26.7703 11.1981 26.9963 10.4539 27.0006H10.1443C9.27894 27.0022 8.43521 26.7315 7.73401 26.2274C7.0328 25.7232 6.51008 25.0114 6.24073 24.1938L0 5.31265H3.41093C4.16371 5.31116 4.89734 5.54845 5.50511 5.99C6.11288 6.43155 6.56309 7.05433 6.79027 7.76776L10.4033 18.9571L14.1301 9.07381C14.3821 8.41824 14.8301 7.85514 15.4137 7.4603C15.9974 7.06546 16.6887 6.85783 17.3946 6.86535C18.1006 6.87288 18.7873 7.09519 19.3623 7.50238C19.9373 7.90957 20.373 8.48209 20.6108 9.14288L24.2049 19.0575Z" fill="currentColor"/>
     </svg> runs the workflows that run your hospital
   </h3>
-  <p class="tagline-2">One operating system for clinical work</p>
-  <div class="line"></div>
-  <a class="product-btn" href="mailto:hola@wuru.ai?subject=W%C3%BAru%20Demo" title="Book a demo" rel="noopener noreferrer">BOOK A DEMO</a>
+  <p class="tagline-2 hl-line" style="--i: 4">One operating system for clinical work</p>
+  <div class="line hl-line" style="--i: 5"></div>
+  <a class="product-btn hl-line" style="--i: 6" href="mailto:hola@wuru.ai?subject=W%C3%BAru%20Demo" title="Book a demo" rel="noopener noreferrer">BOOK A DEMO</a>
 </div>
 
 <style lang="scss">
@@ -56,13 +56,38 @@ import HeroTextChanging from "./HeroTextChanging.astro";
   }
   .hero-text-container {
     position: relative;
-    z-index: 2; /* texto (y su sombra) por delante del cubo */
+    z-index: 2; /* texto por delante del cubo */
     display: flex;
     flex-direction: column;
     align-items: flex-start;
     justify-content: center;
     gap: 2px;
-    left: 6%;
+  }
+
+  /* animación por línea (in/out), disparada por .hero-in en el wrap padre */
+  .hl-line {
+    opacity: 0;
+    transform: translateY(16px);
+    transition:
+      opacity 0.5s ease,
+      transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+    transition-delay: calc(var(--i, 0) * 0.07s);
+  }
+  :global(.hero-in) .hl-line {
+    opacity: 1;
+    transform: none;
+  }
+  /* el botón: opacity only (su transform lo manejan los springs de hover/press) */
+  .product-btn.hl-line {
+    transform: none;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .hl-line {
+      opacity: 1;
+      transform: none;
+      transition: none;
+    }
   }
   .hero-badge {
     display: inline-flex;
@@ -71,13 +96,13 @@ import HeroTextChanging from "./HeroTextChanging.astro";
     padding: 7px 16px;
     border-radius: 100px;
     border: 0.5px solid #7d1703a0;
-    background: rgba(127, 127, 127, 0.14);
+    background: rgba(200, 190, 195, 0.28);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
     color: var(--fg);
     font-size: 14px;
     letter-spacing: 0.5px;
     margin-bottom: 20px;
-    opacity: 0;
-    animation: login-appears 0.3s ease-out 0.7s both;
   }
   .live-dot {
     width: 8px;
@@ -93,14 +118,12 @@ import HeroTextChanging from "./HeroTextChanging.astro";
     font-size: 60px;
     font-weight: 500;
     color: var(--fg);
-    animation: text-in-slide 0.35s ease-out 0.75s both;
   }
   h3 {
     margin: 0;
     font-size: 32px;
     color: var(--accent);
     font-weight: 400;
-    animation: text-in-slide 0.35s ease-out 0.85s both;
   }
   .tagline-1 {
     max-width: 460px;
@@ -120,7 +143,6 @@ import HeroTextChanging from "./HeroTextChanging.astro";
     font-weight: 400;
     color: var(--fg-muted);
     max-width: 460px;
-    animation: text-in-slide 0.35s ease-out 0.95s both;
   }
   .line {
     height: 0.5px;
@@ -128,8 +150,6 @@ import HeroTextChanging from "./HeroTextChanging.astro";
     background-color: #ec5a3d;
     border-radius: 0.5px;
     margin-top: 16px;
-    opacity: 0.7;
-    animation-delay: 0.4s;
     filter: drop-shadow(0 2px 5px rgba(255, 0, 0, 0.8));
   }
   .product-btn {
@@ -146,9 +166,8 @@ import HeroTextChanging from "./HeroTextChanging.astro";
     letter-spacing: 0.5px;
     cursor: pointer;
     margin-top: 32px;
-    opacity: 0;
-    animation: login-appears 0.3s ease-out 1.05s both;
     transition:
+      opacity 0.5s ease,
       transform 0.2s ease,
       box-shadow 0.2s ease,
       filter 0.2s ease;

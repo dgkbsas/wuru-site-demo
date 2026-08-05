@@ -1,0 +1,405 @@
+---
+// Bloque Platform "pineado" (sticky-scroll): el marco (eyebrow + tesis + ejes) queda
+// fijo mientras el scroll cambia el eje activo (Workflow → Embedded → Standalone),
+// cruzando el artifact + la explicación con animación por parte (in/out).
+import LiveBoard from "./LiveBoard.astro";
+import LiveAnalytics from "./LiveAnalytics.astro";
+import CalendarCard from "./CalendarCard.astro";
+import AgentPanel from "./AgentPanel.astro";
+import ChatPanel from "./ChatPanel.astro";
+import ScanPanel from "./ScanPanel.astro";
+
+const axes = [
+  { key: "workflow", name: "Smart Workflows", exp: "One operational source of truth for everything that happens." },
+  { key: "embedded", name: "Embedded agent", exp: "Watches and verifies inside the flow, with a human in the loop." },
+  { key: "standalone", name: "Standalone agent", exp: "Gets whole tasks done, right where people already are." },
+];
+---
+
+<section class="pp" id="plataforma">
+  <div class="pp-stage">
+    <div class="pp-inner">
+      <!-- marco fijo -->
+      <div class="pp-frame">
+        <span class="pp-eyebrow">Platform</span>
+        <h2 class="pp-thesis">Systemic solutions over healthcare infrastructure.</h2>
+        <p class="pp-lede">The three combine as one system to strengthen <strong>any healthcare operation</strong>.</p>
+        <div class="pp-axes">
+          {axes.map((a, i) => (
+            <button type="button" class={`pp-axis${i === 0 ? " is-on" : ""}`} data-axis={i}>
+              <span class="ax-dot"></span>{a.name}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <!-- paneles (cambian por eje) -->
+      <div class="pp-panels">
+        <div class="pp-panel is-on" data-axis="0">
+          <div class="pp-art">
+            <div class="wf-stack">
+              <div class="wf-c wf-c1"><CalendarCard /></div>
+              <div class="wf-c wf-c2"><LiveBoard /></div>
+              <div class="wf-c wf-c3"><LiveAnalytics /></div>
+            </div>
+          </div>
+          <p class="pp-exp">{axes[0].exp}</p>
+        </div>
+        <div class="pp-panel" data-axis="1">
+          <div class="pp-art"><AgentPanel /></div>
+          <p class="pp-exp">{axes[1].exp}</p>
+        </div>
+        <div class="pp-panel" data-axis="2">
+          <div class="pp-art">
+            <div class="sa-stack">
+              <ChatPanel />
+              <ScanPanel />
+            </div>
+          </div>
+          <p class="pp-exp">{axes[2].exp}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- markers: dan el largo de scroll; el que cruza el centro define el eje -->
+  <div class="pp-markers" aria-hidden="true">
+    <div class="pp-marker" data-axis="0"></div>
+    <div class="pp-marker" data-axis="1"></div>
+    <div class="pp-marker" data-axis="2"></div>
+  </div>
+</section>
+
+<script>
+  import { animate, scroll } from "motion";
+
+  const section = document.querySelector<HTMLElement>(".pp");
+  if (section) {
+    // Parallax de salida: en el último tramo del bloque, el contenido pineado
+    // queda rezagado (se mueve más lento que la página) y se apaga un poco,
+    // así la sección siguiente parece montarse por encima.
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const inner = section.querySelector<HTMLElement>(".pp-inner");
+    if (inner && !reduceMotion) {
+      scroll(animate(inner, { y: [0, 150] }, { ease: "linear" }), {
+        target: section,
+        offset: ["end end", "end start"],
+      });
+      scroll(animate(inner, { opacity: [1, 0.35] }, { ease: "linear" }), {
+        target: section,
+        offset: ["end end", "end start"],
+      });
+    }
+
+    const markers = Array.from(section.querySelectorAll<HTMLElement>(".pp-marker"));
+    const axes = Array.from(section.querySelectorAll<HTMLElement>(".pp-axis"));
+    const panels = Array.from(section.querySelectorAll<HTMLElement>(".pp-panel"));
+    let active = 0;
+
+    const setActive = (n: number) => {
+      if (n === active) return;
+      active = n;
+      axes.forEach((a, i) => a.classList.toggle("is-on", i === n));
+      panels.forEach((p, i) => p.classList.toggle("is-on", i === n));
+      // el picker lateral marca el sub-paso
+      window.dispatchEvent(new CustomEvent("deckchange", { detail: { id: `ax-${n}` } }));
+    };
+
+    // el marker que cruza el centro del viewport es el eje activo
+    const io = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((e) => {
+          if (e.isIntersecting) setActive(Number((e.target as HTMLElement).dataset.axis));
+        });
+      },
+      { rootMargin: "-50% 0px -50% 0px", threshold: 0 }
+    );
+    markers.forEach((m) => io.observe(m));
+
+    // click en un eje → scroll a su marker
+    axes.forEach((a, i) => {
+      a.addEventListener("click", () => {
+        markers[i].scrollIntoView({ behavior: "smooth", block: "center" });
+      });
+    });
+
+    // La entrada es de UNA SOLA VÍA: una vez que los artifacts entraron, se
+    // quedan quietos (no animan la salida al dejar el bloque). Se mide el STAGE
+    // pineado (100vh) y no la sección completa.
+    const stage = section.querySelector<HTMLElement>(".pp-stage");
+    if (stage) {
+      const enterIo = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((e) => {
+            if (!e.isIntersecting) return;
+            section.classList.add("seen"); // nunca se quita
+            window.dispatchEvent(new CustomEvent("deckchange", { detail: { id: `ax-${active}` } }));
+          });
+        },
+        { threshold: 0.4 }
+      );
+      enterIo.observe(stage);
+    }
+  }
+</script>
+
+<style>
+  .pp {
+    position: relative;
+    /* 3 ejes × 160vh: cada uno tiene recorrido propio, no se puede saltear
+       (subir/bajar este número = más o menos dwell por eje) */
+    height: 480vh;
+    z-index: 30;
+  }
+
+  /* fan horizontal de Smart Workflows: 3 cards solapadas de izq a derecha,
+     sin inclinación; LIVE STATUS al frente (derecha) */
+  .wf-stack {
+    display: flex;
+    align-items: stretch;
+    justify-content: center;
+  }
+  /* anchos fijos (sin grow/shrink) + misma altura */
+  .wf-c { position: relative; height: 408px; flex: 0 0 auto; }
+  .wf-c > :global(*) { width: 100%; height: 100%; overflow: hidden; box-sizing: border-box; }
+  /* invertido: Calendar al frente (izq) · Live Status en medio · Analytics detrás */
+  .wf-c1 { z-index: 3; width: 420px; }
+  .wf-c2 { z-index: 2; width: 430px; margin-left: -28px; }
+  .wf-c3 { z-index: 1; width: 300px; margin-left: -34px; }
+  /* sombra direccional (frente a la izquierda → cae hacia la derecha) */
+  .wf-c > :global(*) {
+    box-shadow:
+      0 30px 60px -28px rgba(24, 18, 28, 0.5),
+      18px 8px 40px -22px rgba(24, 18, 28, 0.4);
+  }
+
+  /* Standalone: el scan sale como solapa desde atrás del "mobile" (chat) */
+  .sa-stack {
+    display: flex;
+    align-items: stretch;
+    justify-content: center;
+    height: 452px;
+  }
+  /* misma altura exacta: la fija el contenedor */
+  .sa-stack > :global(.chat-panel),
+  .sa-stack > :global(.scan-panel) {
+    position: relative;
+    height: 100%;
+    box-sizing: border-box;
+  }
+  .sa-stack > :global(.chat-panel) { z-index: 2; }
+  .sa-stack > :global(.scan-panel) { z-index: 1; }
+  .pp-stage {
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    z-index: 2;
+    display: grid;
+    place-items: center;
+    padding: 0 var(--gutter);
+    overflow: hidden;
+  }
+  .pp-markers {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    display: flex;
+    flex-direction: column;
+    pointer-events: none;
+  }
+  /* snap SUAVE por eje: align sin scroll-snap-stop → asienta en el eje cuando
+     soltás cerca, pero no frena el scroll con inercia (eso era lo trabado) */
+  .pp-marker {
+    flex: 1;
+    scroll-snap-align: center;
+  }
+
+  .pp-inner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: clamp(24px, 4vh, 44px);
+    width: min(1160px, 94vw);
+    text-align: center;
+  }
+
+  /* ── marco fijo ── */
+  .pp-frame {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .pp-eyebrow {
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 16px;
+  }
+  .pp-thesis {
+    margin: 0 auto;
+    font-size: clamp(23px, 3.3vw, 42px);
+    font-weight: 700;
+    line-height: 1.05;
+    letter-spacing: -0.03em;
+    color: var(--fg);
+    white-space: nowrap;
+  }
+  .pp-lede {
+    margin: 16px 0 0;
+    font-size: clamp(15px, 1.4vw, 19px);
+    color: var(--fg-muted);
+  }
+  .pp-lede :global(strong) { color: var(--fg); font-weight: 600; }
+
+  /* switcher de ejes */
+  .pp-axes {
+    display: inline-flex;
+    gap: 6px;
+    margin-top: 26px;
+    padding: 5px;
+    border-radius: 100px;
+    background: color-mix(in srgb, var(--fg) 6%, transparent);
+    border: 1px solid color-mix(in srgb, var(--fg) 12%, transparent);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+  }
+  .pp-axis {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    border: 0;
+    border-radius: 100px;
+    background: transparent;
+    color: var(--fg-muted);
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 0.2px;
+    cursor: pointer;
+    transition: background 0.35s ease, color 0.35s ease;
+    font-family: inherit;
+  }
+  .ax-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 2px;
+    transform: rotate(45deg);
+    background: currentColor;
+    opacity: 0.5;
+    transition: opacity 0.35s ease;
+  }
+  .pp-axis.is-on {
+    background: var(--accent);
+    color: #fff;
+  }
+  .pp-axis.is-on .ax-dot { background: #fff; opacity: 1; }
+
+  /* entrada del marco (una vez) */
+  .pp-eyebrow,
+  .pp-thesis,
+  .pp-lede,
+  .pp-axes {
+    opacity: 0;
+    transform: translateY(16px);
+    transition: opacity 0.6s ease, transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .pp.seen .pp-eyebrow { opacity: 1; transform: none; transition-delay: 0.02s; }
+  .pp.seen .pp-thesis { opacity: 1; transform: none; transition-delay: 0.1s; }
+  .pp.seen .pp-lede { opacity: 1; transform: none; transition-delay: 0.2s; }
+  .pp.seen .pp-axes { opacity: 1; transform: none; transition-delay: 0.3s; }
+
+  /* ── paneles (cambian por eje) ── */
+  .pp-panels {
+    display: grid;
+    width: 100%;
+  }
+  .pp-panel {
+    grid-area: 1 / 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    visibility: hidden;
+    opacity: 0;
+    transition: opacity 0.35s ease, visibility 0.35s;
+  }
+  .pp-panel.is-on {
+    visibility: visible;
+    opacity: 1;
+  }
+  /* los artifacts son UI: no heredan el centrado del statement */
+  .pp-art { width: 100%; display: flex; justify-content: center; text-align: left; }
+  .pp-exp {
+    margin: 0;
+    max-width: none;
+    white-space: nowrap; /* la explicación va en una sola línea */
+    font-size: clamp(14px, 1.3vw, 17px);
+    line-height: 1.5;
+    color: var(--fg-muted);
+    text-align: center;
+  }
+
+  /* animación por parte (in/out): los artifacts entran cuando la sección se ve
+     (.seen) y el eje está activo — así no están "ya fijos" al llegar al step */
+  .pp-panel .pp-art {
+    opacity: 0;
+    transform: translateY(26px) scale(0.985);
+    transition: opacity 0.55s ease, transform 0.65s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .pp-panel .pp-exp {
+    opacity: 0;
+    transform: translateY(16px);
+    transition: opacity 0.5s ease, transform 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .pp.seen .pp-panel.is-on .pp-art { opacity: 1; transform: none; transition-delay: 0.34s; }
+  .pp.seen .pp-panel.is-on .pp-exp { opacity: 1; transform: none; transition-delay: 0.48s; }
+
+  /* las 3 cards del fan entran escalonadas */
+  .wf-c {
+    opacity: 0;
+    transform: translateY(22px);
+    transition: opacity 0.5s ease, transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .pp.seen .pp-panel.is-on .wf-c { opacity: 1; transform: none; }
+  .pp.seen .pp-panel.is-on .wf-c1 { transition-delay: 0.38s; }
+  .pp.seen .pp-panel.is-on .wf-c2 { transition-delay: 0.5s; }
+  .pp.seen .pp-panel.is-on .wf-c3 { transition-delay: 0.62s; }
+
+  @media only screen and (max-width: 1024px) {
+    .pp { height: auto; }
+    .pp-stage {
+      position: static;
+      height: auto;
+      min-height: 100vh;
+      padding: 80px var(--gutter);
+    }
+    .pp-markers { display: none; }
+    /* en mobile mostramos los 3 ejes apilados (sin pin) */
+    .pp-panels { display: flex; flex-direction: column; gap: 60px; margin-top: 40px; }
+    .pp-panel {
+      position: static;
+      visibility: visible;
+      opacity: 1;
+    }
+    .pp-panel .pp-art, .pp-panel .pp-exp { opacity: 1; transform: none; }
+    .pp-eyebrow, .pp-thesis, .pp-lede, .pp-axes { opacity: 1; transform: none; }
+    .pp-thesis { white-space: normal; font-size: clamp(26px, 7vw, 40px); }
+    .pp-exp { white-space: normal; max-width: 460px; margin-inline: auto; }
+    .pp-axes { display: none; }
+    .wf-stack { flex-direction: column; gap: 22px; align-items: center; }
+    .wf-c { height: auto; width: auto; }
+    .wf-c > :global(*) { height: auto; width: auto; overflow: visible; }
+    .wf-c2, .wf-c3 { margin-left: 0; }
+    .wf-c3 :global(.board) { max-width: none; }
+    .sa-stack { flex-direction: column; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .pp-eyebrow, .pp-thesis, .pp-lede, .pp-axes,
+    .pp-panel, .pp-panel .pp-art, .pp-panel .pp-exp {
+      transition: none;
+    }
+  }
+</style>

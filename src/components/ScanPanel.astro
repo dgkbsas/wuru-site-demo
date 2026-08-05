@@ -1,0 +1,263 @@
+---
+// Solapa que sale desde atrás del "mobile" (chat): el agente procesa el pedido y
+// TODO se apila desde abajo — el pedido (IN) es el primer item de la pila, después
+// los pasos, y al final la respuesta (OUT). Con cada pedido nuevo la pila se limpia.
+// Los items los crea el JS → sus estilos van en el bloque is:global.
+---
+
+<div class="scan-panel" aria-hidden="true">
+  <div class="art-head">
+    <span class="art-title">AGENT SCAN</span>
+    <span class="art-status"><span class="art-dot"></span>PROCESSING</span>
+  </div>
+
+  <!-- todo se apila acá: IN → pasos → OUT (lo crea el JS) -->
+  <ul class="sc-list"></ul>
+</div>
+
+<script>
+  const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const root = document.querySelector<HTMLElement>(".scan-panel");
+  // guard: si el módulo se re-ejecuta (HMR), no arrancamos un segundo loop
+  if (root && root.dataset.scanInit !== "1") {
+    root.dataset.scanInit = "1";
+    const list = root.querySelector<HTMLElement>(".sc-list");
+
+    const STEPS = [
+      { t: "Request parsed", d: "M4 7h16M4 12h10M4 17h7" },
+      { t: "Agenda scanned", d: "M7 2v3M17 2v3M3 8h18M5 5h14a1 1 0 011 1v13a1 1 0 01-1 1H5a1 1 0 01-1-1V6a1 1 0 011-1z" },
+      { t: "Records gathered", d: "M7 3h7l5 5v13a1 1 0 01-1 1H7a1 1 0 01-1-1V4a1 1 0 011-1zM14 3v5h5" },
+      { t: "Availability checked", d: "M3 21V9l9-6 9 6v12M9 21v-7h6v7" },
+      { t: "Response built", d: "M12 3l2.4 5.6L20 11l-5.6 2.4L12 19l-2.4-5.6L4 11l5.6-2.4z" },
+    ];
+
+    const makeStep = (s: { t: string; d: string }) => {
+      const li = document.createElement("li");
+      li.className = "sc sc-scan sc-enter";
+      li.innerHTML =
+        `<span class="sc-ic"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" ` +
+        `stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">` +
+        `<path d="${s.d}"/></svg></span>` +
+        `<span class="sc-name">${s.t}</span><span class="sc-mark"></span>`;
+      li.addEventListener("animationend", () => li.classList.remove("sc-enter"), { once: true });
+      return li;
+    };
+    // el pedido y la respuesta también son items de la pila
+    const makeIn = (q: string) => {
+      const li = document.createElement("li");
+      li.className = "sc-io-row sc-req sc-enter";
+      li.innerHTML = `<span class="sc-io">IN</span><span class="sc-io-t">${q}</span>`;
+      li.addEventListener("animationend", () => li.classList.remove("sc-enter"), { once: true });
+      return li;
+    };
+    const makeOut = () => {
+      const li = document.createElement("li");
+      li.className = "sc-io-row sc-res sc-enter";
+      li.innerHTML =
+        `<span class="sc-io out">OUT</span><span class="sc-io-t">Response sent</span>` +
+        `<span class="sc-sent"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" ` +
+        `stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">` +
+        `<path d="M21 3L3 10.5l6.5 2.7L12 21z"/></svg></span>`;
+      li.addEventListener("animationend", () => li.classList.remove("sc-enter"), { once: true });
+      return li;
+    };
+
+    let timers: number[] = [];
+    const clear = () => { timers.forEach((t) => clearTimeout(t)); timers = []; };
+    const at = (ms: number, fn: () => void) => timers.push(window.setTimeout(fn, ms));
+
+    // la pila NO se limpia: el pedido nuevo se apila debajo del anterior y los
+    // viejos van saliendo por arriba (recortados por overflow), como el chat
+    const MAX = (STEPS.length + 2) * 3;
+    const push = (node: HTMLElement) => {
+      if (!list) return;
+      list.appendChild(node);
+      while (list.children.length > MAX) list.firstChild?.remove();
+    };
+
+    // el chat manda el pedido (wuru-req) con la ventana de tiempo que tenemos
+    // hasta su respuesta: los pasos se reparten dentro de esa ventana.
+    const onReq = (q: string, windowMs: number) => {
+      clear();
+      push(makeIn(q));
+      const STEP = Math.max(260, Math.floor((windowMs - 260) / STEPS.length));
+      STEPS.forEach((s, i) => {
+        at(260 + i * STEP, () => {
+          const li = makeStep(s);
+          push(li);
+          at(Math.max(140, STEP - 120), () => {
+            li.classList.remove("sc-scan");
+            li.classList.add("sc-done");
+          });
+        });
+      });
+    };
+
+    if (reduce) {
+      list?.appendChild(makeIn("What's on OR 3 tomorrow?"));
+      STEPS.forEach((s) => {
+        const li = makeStep(s);
+        li.classList.remove("sc-scan", "sc-enter");
+        li.classList.add("sc-done");
+        list?.appendChild(li);
+      });
+      list?.appendChild(makeOut());
+    } else {
+      window.addEventListener("wuru-req", (e) => {
+        const d = (e as CustomEvent).detail ?? {};
+        onReq(d.q ?? "", d.window ?? 3400);
+      });
+      // la respuesta del chat cierra el ciclo
+      window.addEventListener("wuru-res", () => {
+        // los pasos que quedaron corriendo se marcan hechos antes del OUT
+        list?.querySelectorAll<HTMLElement>(".sc-scan").forEach((el) => {
+          el.classList.remove("sc-scan");
+          el.classList.add("sc-done");
+        });
+        push(makeOut());
+      });
+    }
+  }
+</script>
+
+<style>
+  .scan-panel {
+    --p-surface: #ffffff;
+    --p-surface-2: #f4f3f6;
+    --p-border: rgba(24, 18, 28, 0.09);
+    --p-ink: #241d2b;
+    --p-muted: #8b8593;
+    --p-label: #a8a2af;
+    --p-accent: #e0563d;
+
+    /* medidas FIJAS: el contenido nunca cambia el tamaño */
+    width: 280px;
+    flex: 0 0 280px;
+    min-width: 0;
+    box-sizing: border-box;
+    background: var(--p-surface);
+    border: 1px solid var(--p-border);
+    border-left: 0;
+    /* solapa que sale desde atrás del mobile */
+    border-radius: 0 20px 20px 0;
+    padding: 17px 18px 17px 42px;
+    margin-left: -26px;
+    box-shadow: 22px 22px 50px -28px rgba(24, 18, 28, 0.5);
+    font-family: "Inter", ui-sans-serif, system-ui, -apple-system, sans-serif;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* lista: alto reservado y anclada abajo → todo se apila desde abajo */
+  .sc-list {
+    list-style: none;
+    margin: 10px 0 0;
+    padding: 0;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    gap: 6px;
+    overflow: hidden;
+  }
+</style>
+
+<!-- items creados por JS: estilos globales namespaceados bajo .scan-panel -->
+<style is:global>
+  /* IN / OUT como items de la pila */
+  .scan-panel .sc-io-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 10px;
+    border-radius: 10px;
+    font-size: 11.5px;
+    min-width: 0;
+  }
+  /* el pedido abre un ciclo nuevo: un poco de aire para separarlo del anterior */
+  .scan-panel .sc-req { background: var(--p-surface-2); color: var(--p-ink); margin-top: 8px; }
+  .scan-panel .sc-req:first-child { margin-top: 0; }
+  .scan-panel .sc-res { background: #eafaf0; color: #23924f; }
+  .scan-panel .sc-io {
+    font-family: ui-monospace, Menlo, monospace;
+    font-size: 8px;
+    font-weight: 700;
+    letter-spacing: 0.6px;
+    padding: 2px 5px;
+    border-radius: 4px;
+    background: color-mix(in srgb, var(--p-ink) 10%, transparent);
+    color: var(--p-muted);
+    flex-shrink: 0;
+  }
+  .scan-panel .sc-io.out { background: color-mix(in srgb, #37b26a 20%, transparent); color: #23924f; }
+  .scan-panel .sc-io-t { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+  .scan-panel .sc-res .sc-io-t { font-weight: 600; }
+  .scan-panel .sc-sent { margin-left: auto; display: inline-grid; place-items: center; color: #2fae63; flex-shrink: 0; }
+
+  /* pasos */
+  .scan-panel .sc {
+    display: grid;
+    grid-template-columns: 28px 1fr 16px;
+    align-items: center;
+    gap: 9px;
+    min-width: 0;
+  }
+  .scan-panel .sc-ic {
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    display: grid;
+    place-items: center;
+    color: var(--p-label);
+    background: var(--p-surface-2);
+    border: 1px solid var(--p-border);
+    transition: all 0.3s ease;
+  }
+  .scan-panel .sc-name {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--p-label);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    transition: color 0.3s ease;
+  }
+  .scan-panel .sc-mark {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    border: 2px solid color-mix(in srgb, var(--p-ink) 13%, transparent);
+    transition: all 0.3s ease;
+  }
+  /* buscando */
+  .scan-panel .sc-scan .sc-ic {
+    color: var(--p-accent);
+    background: color-mix(in srgb, var(--p-accent) 10%, #fff);
+    border-color: color-mix(in srgb, var(--p-accent) 40%, transparent);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--p-accent) 10%, transparent);
+  }
+  .scan-panel .sc-scan .sc-name { color: var(--p-ink); }
+  .scan-panel .sc-scan .sc-mark {
+    border-color: var(--p-accent);
+    border-right-color: transparent;
+    animation: sc-spin 0.7s linear infinite;
+  }
+  /* hecho */
+  .scan-panel .sc-done .sc-ic { color: #2fae63; border-color: color-mix(in srgb, #37b26a 35%, transparent); }
+  .scan-panel .sc-done .sc-name { color: var(--p-ink); }
+  .scan-panel .sc-done .sc-mark {
+    border-color: transparent;
+    background: #37b26a url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 6L9 17l-5-5'/%3E%3C/svg%3E") center/11px no-repeat;
+  }
+  /* cada item nuevo aparece desde abajo */
+  .scan-panel .sc-enter { animation: sc-enter 0.4s cubic-bezier(0.22, 1, 0.36, 1) both; }
+  @keyframes sc-enter {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes sc-spin { to { transform: rotate(360deg); } }
+
+  @media (prefers-reduced-motion: reduce) {
+    .scan-panel .sc-enter, .scan-panel .sc-scan .sc-mark { animation: none; }
+  }
+</style>

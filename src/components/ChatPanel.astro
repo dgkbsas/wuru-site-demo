@@ -1,0 +1,244 @@
+---
+// Artifact del eje Standalone agent: chat en vivo (estilo WhatsApp, paleta producto).
+// Los mensajes van entrando y empujando hacia arriba, con typing.
+---
+
+<div class="chat-panel" aria-hidden="true">
+  <div class="cp-card">
+    <div class="cp-head">
+      <span class="cp-ava">W</span>
+      <span class="cp-who">
+        <span class="cp-name">Wúru</span>
+        <span class="cp-status"><span class="cp-dot"></span>online</span>
+      </span>
+      <span class="cp-ch">WhatsApp</span>
+    </div>
+    <div class="cp-body"></div>
+  </div>
+</div>
+
+<script>
+  // El chat es el que MANEJA EL TIEMPO: por cada intercambio avisa al Agent Scan
+  // cuándo entra el pedido (wuru-req) y cuándo sale la respuesta (wuru-res), así
+  // los dos artifacts van coordinados pregunta por pregunta.
+  const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const panel = document.querySelector<HTMLElement>(".chat-panel");
+  const body = panel?.querySelector<HTMLElement>(".cp-body");
+
+  const EXCHANGES: { q: string; a: string; ok?: boolean }[] = [
+    { q: "What's on OR 3 tomorrow?", a: "3 cases — Ruiz 09:00, Vega 11:00, Lim 13:30" },
+    { q: "Book a knee arthroscopy next Tuesday", a: "Booked · OR 2, 10:00 · confirmation sent", ok: true },
+    { q: "Show Mr. Ruiz's recent labs", a: "Last CBC 2 days ago · Hb 13.2 · all in range" },
+    { q: "Log follow-up for Sáez: tolerating infusion well", a: "Follow-up saved to Sáez's record", ok: true },
+    { q: "Any infusion chair free at 2pm?", a: "Chair 2 is open · booked for Sáez", ok: true },
+  ];
+
+  // ritmo del intercambio (ms) — el scan encaja sus 5 pasos en la ventana de typing
+  const T_TYPING = 520; // aparece "escribiendo"
+  const T_ANSWER = 3900; // llega la respuesta
+  const T_NEXT = 5500; // arranca el próximo pedido
+  const SCAN_WINDOW = T_ANSWER - T_TYPING; // lo que dura el procesamiento
+
+  const node = (m: { who: string; t?: string; ok?: boolean; typing?: boolean }) => {
+    const el = document.createElement("div");
+    if (m.typing) {
+      el.className = "msg bot typing enter";
+      el.innerHTML = "<span></span><span></span><span></span>";
+    } else {
+      el.className = "msg " + m.who + (m.ok ? " msg-ok" : "") + " enter";
+      el.textContent = m.t ?? "";
+    }
+    return el;
+  };
+
+  // guard: si el módulo se re-ejecuta (HMR), no arrancamos un segundo loop
+  if (body && panel && panel.dataset.cpInit !== "1") {
+    panel.dataset.cpInit = "1";
+    // se conservan más globos que los visibles: los viejos salen por arriba
+    const trim = () => { while (body.children.length > 16) body.firstChild?.remove(); };
+    const push = (m: Parameters<typeof node>[0]) => {
+      const el = node(m);
+      body.appendChild(el);
+      trim();
+      return el;
+    };
+
+    if (reduce) {
+      EXCHANGES.forEach((x) => {
+        push({ who: "user", t: x.q });
+        push({ who: "bot", t: x.a, ok: x.ok });
+      });
+    } else {
+      let xi = 0;
+      const exchange = () => {
+        const x = EXCHANGES[xi % EXCHANGES.length];
+        xi++;
+
+        // 1) el usuario pregunta → el scan recibe el pedido
+        push({ who: "user", t: x.q });
+        window.dispatchEvent(
+          new CustomEvent("wuru-req", { detail: { q: x.q, window: SCAN_WINDOW } })
+        );
+
+        // 2) el agente procesa (mientras el scan corre sus pasos)
+        let typingEl: HTMLElement | null = null;
+        setTimeout(() => { typingEl = push({ who: "bot", typing: true }); }, T_TYPING);
+
+        // 3) llega la respuesta → el scan la marca como enviada
+        setTimeout(() => {
+          typingEl?.remove();
+          push({ who: "bot", t: x.a, ok: x.ok });
+          window.dispatchEvent(new CustomEvent("wuru-res"));
+        }, T_ANSWER);
+
+        setTimeout(exchange, T_NEXT);
+      };
+      exchange();
+    }
+  }
+</script>
+
+<style>
+  .chat-panel {
+    --p-surface: #ffffff;
+    --p-surface-2: #f2f1f4;
+    --p-border: rgba(24, 18, 28, 0.09);
+    --p-ink: #241d2b;
+    --p-muted: #8b8593;
+    --p-label: #a8a2af;
+    --p-accent: #e0563d;
+    /* sombra direccional (como el fan de Smart Workflows): el chat está al
+       frente y proyecta hacia la derecha, sobre la solapa del scan */
+    --p-shadow:
+      0 30px 60px -28px rgba(24, 18, 28, 0.5),
+      18px 8px 40px -18px rgba(24, 18, 28, 0.45);
+
+    width: 440px;
+    flex: 0 0 440px;
+    max-width: 100%;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    font-family: "Inter", ui-sans-serif, system-ui, -apple-system, sans-serif;
+  }
+  .cp-card {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    background: var(--p-surface);
+    border: 1px solid var(--p-border);
+    border-radius: 20px;
+    box-shadow: var(--p-shadow);
+    overflow: hidden;
+  }
+  .cp-head {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    padding: 13px 16px;
+    border-bottom: 1px solid var(--p-border);
+    background: var(--p-surface-2);
+  }
+  .cp-ava {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    background: var(--p-accent);
+    color: #fff;
+    font-weight: 700;
+    font-size: 15px;
+    flex-shrink: 0;
+  }
+  .cp-who { display: flex; flex-direction: column; line-height: 1.25; }
+  .cp-name { font-size: 14px; font-weight: 600; color: var(--p-ink); }
+  .cp-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 11px;
+    color: var(--p-muted);
+  }
+  .cp-dot { width: 6px; height: 6px; border-radius: 50%; background: #37b26a; }
+  .cp-ch {
+    margin-left: auto;
+    font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+    font-size: 10px;
+    letter-spacing: 0.5px;
+    color: var(--p-label);
+  }
+  .cp-body {
+    flex: 1;
+    min-height: 0;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    gap: 9px;
+    overflow: hidden;
+    background:
+      radial-gradient(circle at 20% 10%, rgba(224, 86, 61, 0.04), transparent 60%),
+      var(--p-surface);
+  }
+  @media only screen and (max-width: 1024px) {
+    .chat-panel { width: 100%; flex: 1 1 auto; }
+    .cp-body { min-height: 300px; }
+  }
+</style>
+
+<!-- mensajes creados por JS: globales, namespaceados bajo .chat-panel -->
+<style is:global>
+  .chat-panel .msg {
+    max-width: 82%;
+    padding: 9px 13px;
+    border-radius: 15px;
+    font-size: 13.5px;
+    line-height: 1.4;
+  }
+  .chat-panel .msg.user {
+    align-self: flex-end;
+    background: var(--p-accent);
+    color: #fff;
+    border-bottom-right-radius: 5px;
+  }
+  .chat-panel .msg.bot {
+    align-self: flex-start;
+    background: var(--p-surface-2);
+    color: var(--p-ink);
+    border-bottom-left-radius: 5px;
+  }
+  .chat-panel .msg.msg-ok {
+    background: #eafaf0;
+    color: #23924f;
+    font-weight: 500;
+  }
+  .chat-panel .msg.typing {
+    display: inline-flex;
+    gap: 5px;
+    align-items: center;
+    padding: 12px 14px;
+  }
+  .chat-panel .msg.typing span {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--p-muted);
+    animation: cp-type 1.2s ease-in-out infinite;
+  }
+  .chat-panel .msg.typing span:nth-child(2) { animation-delay: 0.18s; }
+  .chat-panel .msg.typing span:nth-child(3) { animation-delay: 0.36s; }
+  .chat-panel .enter { animation: cp-enter 0.42s cubic-bezier(0.22, 1, 0.36, 1) both; }
+  @keyframes cp-type {
+    0%, 60%, 100% { opacity: 0.3; transform: translateY(0); }
+    30% { opacity: 1; transform: translateY(-2px); }
+  }
+  @keyframes cp-enter {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .chat-panel .msg.typing span, .chat-panel .enter { animation: none; }
+  }
+</style>

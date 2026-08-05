@@ -1,0 +1,363 @@
+---
+// Artifact del eje Embedded agent (paleta producto). Énfasis en DELEGAR a
+// múltiples agentes + notificaciones + dos checklists (pre-op y ejecución).
+//   izq: roster de agentes a los que el usuario delega
+//   der: notificaciones (arriba) + PRE-OP CHECKS + EXECUTION CHECKS
+const agents = [
+  { name: "Scheduling agent", task: "Booking 3 OR cases", state: "run" },
+  { name: "Reviewer agent", task: "Equipment overlap check", state: "run" },
+  { name: "Analysis agent", task: "Block utilization", state: "run" },
+  { name: "Notes agent", task: "Drafting op notes", state: "run" },
+  { name: "Intake agent", task: "Screening referrals", state: "run" },
+  { name: "Billing agent", task: "Coding procedures", state: "run" },
+  { name: "Follow-up agent", task: "Post-op check-ins", state: "run" },
+  { name: "Report agent", task: "Weekly OR report", state: "done" },
+];
+// fases del quirófano detectadas por computer vision (video analizado por agentes)
+const phases = [
+  "OR opened",
+  "Patient in",
+  "Anesthesia",
+  "Incision",
+  "Patient out",
+  "Cleaning started",
+  "Room closed",
+];
+// hexágono (no "magic sparkle")
+const HEX = `<svg viewBox="0 0 24 24" width="13" height="13" aria-hidden="true"><path fill="#fff" d="M12 2.6l7.8 4.5v9L12 20.6 4.2 16.1v-9z"/></svg>`;
+---
+
+<div class="agent-panel" aria-hidden="true">
+  <!-- roster de agentes: el usuario DELEGA -->
+  <div class="ap-card ap-agents">
+    <div class="art-head">
+      <span class="art-title">AGENTS</span>
+      <span class="art-status">you delegate · they execute</span>
+    </div>
+    <ul class="ag-list">
+      {agents.map((a) => (
+        <li class={`ag ag-${a.state}`}>
+          <span class="ag-ic" set:html={HEX} />
+          <span class="ag-body">
+            <span class="ag-name">{a.name}</span>
+            <span class="ag-task">{a.task}</span>
+          </span>
+          <span class="ag-state">
+            <span class="ag-dot"></span><span class="ag-lbl"><span>{a.state === "done" ? "done" : "running"}</span></span>
+          </span>
+        </li>
+      ))}
+    </ul>
+  </div>
+
+  <!-- der: notificaciones + video AI (verifica ejecución por visión) -->
+  <div class="ap-right">
+    <div class="ap-feed"></div>
+
+    <div class="ap-card ap-cv">
+      <div class="art-head">
+        <span class="art-title">
+          <span class="cv-cam">
+            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M15 8.5V6a1 1 0 00-1-1H3a1 1 0 00-1 1v12a1 1 0 001 1h11a1 1 0 001-1v-2.5l7 4.5V4z" />
+            </svg>
+          </span>
+          COMPUTER VISION
+        </span>
+        <span class="art-status cv-rec"><span class="art-dot is-rec"></span>LIVE</span>
+      </div>
+      <span class="cv-sub">OR video · phases detected by agents</span>
+      <ul class="ck-list">
+        {phases.map((c) => (
+          <li class="ck"><span class="ck-mark"></span><span class="ck-t">{c}</span></li>
+        ))}
+      </ul>
+    </div>
+  </div>
+</div>
+
+<script>
+  const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const rootEl = document.querySelector<HTMLElement>(".agent-panel");
+  // guard: si el módulo se re-ejecuta (HMR), no arrancamos un segundo loop
+  const root = rootEl && rootEl.dataset.apInit !== "1" ? ((rootEl.dataset.apInit = "1"), rootEl) : null;
+  const HEX =
+    `<svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path fill="#fff" d="M12 2.6l7.8 4.5v9L12 20.6 4.2 16.1v-9z"/></svg>`;
+  if (root) {
+    // notificaciones (arriba de los checks)
+    const feed = root.querySelector<HTMLElement>(".ap-feed");
+    const NOTIFS = [
+      { title: "Turnover optimized", sub: "−18 min between cases", tone: "" },
+      { title: "OR overlap detected", sub: "OR 2 · 10:30 – 11:40", tone: "alert" },
+      { title: "Pre-op verified", sub: "OR 3 · room ready", tone: "ok" },
+      { title: "Eligibility confirmed", sub: "Vega · CT chest", tone: "ok" },
+      { title: "Missing pre-op labs", sub: "Lim · cataract", tone: "alert" },
+    ];
+    const AGES = ["now", "4m", "9m"];
+    const notifNode = (n: { title: string; sub: string; tone: string }) => {
+      const el = document.createElement("div");
+      el.className = "notif enter" + (n.tone ? " nf-" + n.tone : "");
+      el.innerHTML =
+        `<div class="nf-ic">${HEX}</div><div class="nf-body"><div class="nf-top">` +
+        `<span class="nf-label">AGENT</span><span class="nf-age">now</span></div>` +
+        `<div class="nf-title">${n.title}</div><div class="nf-sub">${n.sub}</div></div>`;
+      el.addEventListener("animationend", () => el.classList.remove("enter"), { once: true });
+      return el;
+    };
+    if (feed) {
+      let i = 0;
+      const reage = () =>
+        Array.from(feed.children).forEach((c, k) => {
+          const a = c.querySelector<HTMLElement>(".nf-age");
+          if (a) a.textContent = AGES[k] ?? "";
+        });
+      const push = () => {
+        feed.prepend(notifNode(NOTIFS[i % NOTIFS.length]));
+        while (feed.children.length > 3) feed.lastChild?.remove();
+        reage();
+        i++;
+      };
+      push();
+      if (!reduce) setInterval(push, 2400);
+      else { push(); push(); }
+    }
+
+    // checklists (offset distinto para que no vayan iguales)
+    root.querySelectorAll<HTMLElement>(".ck-list").forEach((el, idx) => {
+      const items = Array.from(el.querySelectorAll<HTMLElement>(".ck"));
+      const render = (n: number) =>
+        items.forEach((it, k) => {
+          const done = k < n;
+          it.classList.toggle("ck-done", done);
+          const m = it.querySelector<HTMLElement>(".ck-mark");
+          if (m) m.textContent = done ? "✓" : "";
+        });
+      if (reduce) return render(items.length);
+      let c = idx === 0 ? 0 : 2;
+      render(c);
+      setInterval(() => {
+        c = c > items.length ? 0 : c + 1;
+        render(c);
+      }, 1100);
+    });
+
+    // roster: los agentes NO salen — van cambiando de estado (siempre trabajando)
+    const rows = Array.from(root.querySelectorAll<HTMLElement>(".ag"));
+    if (rows.length && !reduce) {
+      // estado: [label, clase de tono]
+      const STATES: [string, string][] = [
+        ["running", "ag-run"],
+        ["analyzing", "ag-run"],
+        ["summarizing", "ag-run"],
+        ["alerting", "ag-alert"],
+        ["done", "ag-done"],
+        ["queued", "ag-idle"],
+      ];
+      rows.forEach((row, ri) => {
+        const st = row.querySelector<HTMLElement>(".ag-state");
+        if (!st) return;
+        let si = ri % STATES.length;
+        const paint = () => {
+          const [label, cls] = STATES[si];
+          row.classList.remove("ag-run", "ag-done", "ag-alert", "ag-idle");
+          row.classList.add(cls);
+          // el label cambia con slide (mismo lenguaje que los otros artifacts)
+          const slot = st.querySelector<HTMLElement>(".ag-lbl");
+          const cur = slot?.firstElementChild as HTMLElement | null;
+          if (!slot || !cur) return;
+          const next = document.createElement("span");
+          next.textContent = label;
+          slot.appendChild(next);
+          requestAnimationFrame(() => {
+            cur.style.transition = "transform 0.38s cubic-bezier(0.22,1,0.36,1)";
+            next.style.transition = "transform 0.38s cubic-bezier(0.22,1,0.36,1)";
+            cur.style.transform = "translateY(-100%)";
+            next.style.transform = "translateY(-100%)";
+          });
+          next.addEventListener("transitionend", () => {
+            cur.remove();
+            next.style.transition = "none";
+            next.style.transform = "none";
+          }, { once: true });
+        };
+        setInterval(() => {
+          si = (si + 1) % STATES.length;
+          paint();
+        }, 2200 + ri * 420);
+      });
+    }
+  }
+</script>
+
+<style>
+  .agent-panel {
+    --p-surface: #ffffff;
+    --p-surface-2: #f6f5f8;
+    --p-border: rgba(24, 18, 28, 0.09);
+    --p-ink: #241d2b;
+    --p-muted: #8b8593;
+    --p-label: #a8a2af;
+    --p-violet: #6f4fd0;
+    --p-shadow: 0 22px 50px -26px rgba(24, 18, 28, 0.45);
+
+    display: grid;
+    grid-template-columns: 1.1fr 1fr;
+    gap: 16px;
+    width: 100%;
+    max-width: 740px;
+    margin-inline: auto;
+    align-items: stretch;
+    font-family: "Inter", ui-sans-serif, system-ui, -apple-system, sans-serif;
+  }
+  .ap-card {
+    background: var(--p-surface);
+    border: 1px solid var(--p-border);
+    border-radius: 18px;
+    padding: 15px 16px;
+    box-shadow: var(--p-shadow);
+  }
+  /* roster (los items van en el bloque global: el JS crea filas nuevas) */
+  .ap-agents { align-self: stretch; display: flex; flex-direction: column; overflow: hidden; }
+  .ag-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; flex: 1; justify-content: space-between; }
+
+  /* der */
+  .ap-right { display: flex; flex-direction: column; gap: 12px; }
+  .ap-feed { display: flex; flex-direction: column; min-height: 130px; }
+  .ck-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+  .ck { display: flex; align-items: center; gap: 10px; font-size: 12.5px; color: var(--p-muted); transition: color 0.3s ease; }
+  .ck-mark {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    font-size: 11px;
+    font-weight: 700;
+    color: #fff;
+    border: 2px solid color-mix(in srgb, var(--p-ink) 20%, transparent);
+    background: transparent;
+    flex-shrink: 0;
+    transition: all 0.3s ease;
+  }
+  .ck-done { color: var(--p-ink); }
+  .ck-done .ck-mark {
+    border-color: transparent;
+    background: linear-gradient(140deg, #5fd08a 0%, #33ad63 100%);
+    box-shadow: 0 4px 9px -3px rgba(51, 173, 99, 0.5);
+  }
+
+  /* computer vision: fases del quirófano detectadas por agentes */
+  .ap-cv { display: flex; flex-direction: column; }
+  .cv-sub { font-size: 11px; color: var(--p-muted); margin-bottom: 13px; }
+  .cv-cam { display: inline-grid; place-items: center; color: var(--p-violet); }
+  /* indicador LIVE de video (REC) */
+  .cv-rec { color: #d8452c; font-weight: 700; }
+
+  @media only screen and (max-width: 1024px) {
+    .agent-panel { grid-template-columns: 1fr; max-width: 420px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .va-scan, .va-box { animation: none; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .ag-run .ag-dot { animation: none; }
+  }
+</style>
+
+<!-- nodos creados por JS (roster + notificaciones): globales, bajo .agent-panel -->
+<style is:global>
+  /* ── roster de agentes ── */
+  .agent-panel .ag { display: grid; grid-template-columns: 28px 1fr auto; align-items: center; gap: 10px; }
+  .agent-panel .ag-ic {
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    display: grid;
+    place-items: center;
+    background: linear-gradient(140deg, #9a7be6 0%, #6f4fd0 100%);
+    box-shadow: 0 6px 13px -5px rgba(111, 79, 208, 0.55);
+  }
+  /* títulos alineados a la izquierda */
+  .agent-panel .ag-body {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    text-align: left;
+    line-height: 1.2;
+    min-width: 0;
+  }
+  .agent-panel .ag-name { font-size: 13px; font-weight: 600; color: var(--p-ink); }
+  .agent-panel .ag-task { font-size: 11px; color: var(--p-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .agent-panel .ag-state {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-family: ui-monospace, Menlo, monospace;
+    font-size: 9.5px;
+    color: var(--p-muted);
+  }
+  .agent-panel .ag-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; transition: background 0.3s ease; }
+  /* slot del label: slide al cambiar de estado */
+  .agent-panel .ag-lbl { display: block; overflow: hidden; height: 1.3em; line-height: 1.3; min-width: 62px; }
+  .agent-panel .ag-lbl > span { display: block; line-height: 1.3; white-space: nowrap; }
+  /* tonos por estado */
+  .agent-panel .ag-run .ag-dot { background: var(--p-violet); color: var(--p-violet); animation: ap-pulse2 1.6s ease-out infinite; }
+  .agent-panel .ag-run .ag-state { color: var(--p-violet); }
+  .agent-panel .ag-alert .ag-dot { background: #e08a2e; color: #e08a2e; animation: ap-pulse2 1.1s ease-out infinite; }
+  .agent-panel .ag-alert .ag-state { color: #d98a2a; }
+  .agent-panel .ag-done .ag-dot { background: #37b26a; }
+  .agent-panel .ag-done .ag-state { color: #2fae63; }
+  .agent-panel .ag-idle .ag-dot { background: color-mix(in srgb, var(--p-ink) 22%, transparent); }
+  .agent-panel .ag-idle .ag-state { color: var(--p-label); }
+  @keyframes ap-pulse2 {
+    0% { box-shadow: 0 0 0 0 currentColor; }
+    70%, 100% { box-shadow: 0 0 0 5px transparent; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .agent-panel .ag-dot { animation: none !important; }
+  }
+
+  .agent-panel .notif {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    background: var(--p-surface);
+    border: 1px solid var(--p-border);
+    border-radius: 13px;
+    padding: 10px 12px;
+    box-shadow: 0 14px 28px -14px rgba(24, 18, 28, 0.5);
+    position: relative;
+    transform-origin: top center;
+    transition: opacity 0.4s ease, transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .agent-panel .notif + .notif { margin-top: -28px; }
+  .agent-panel .notif:nth-child(1) { z-index: 5; opacity: 1; }
+  .agent-panel .notif:nth-child(2) { z-index: 4; opacity: 0.88; transform: scale(0.972); }
+  .agent-panel .notif:nth-child(3) { z-index: 3; opacity: 0.6; transform: scale(0.944); }
+  .agent-panel .nf-ic {
+    width: 32px;
+    height: 32px;
+    flex-shrink: 0;
+    border-radius: 10px;
+    display: grid;
+    place-items: center;
+    background: linear-gradient(140deg, #9a7be6 0%, #6f4fd0 100%);
+    box-shadow: 0 8px 16px -5px rgba(111, 79, 208, 0.55);
+  }
+  .agent-panel .nf-alert .nf-ic { background: linear-gradient(140deg, #f2b25a 0%, #e08a2e 100%); box-shadow: 0 8px 16px -5px rgba(224, 138, 46, 0.55); }
+  .agent-panel .nf-ok .nf-ic { background: linear-gradient(140deg, #5fd08a 0%, #2fae63 100%); box-shadow: 0 8px 16px -5px rgba(47, 174, 99, 0.55); }
+  .agent-panel .nf-body { min-width: 0; flex: 1; }
+  .agent-panel .nf-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1px; }
+  .agent-panel .nf-label { font-family: ui-monospace, Menlo, monospace; font-size: 9.5px; letter-spacing: 1px; color: var(--p-label); }
+  .agent-panel .nf-age { font-family: ui-monospace, Menlo, monospace; font-size: 9.5px; color: var(--p-label); }
+  .agent-panel .nf-title { font-size: 13.5px; font-weight: 600; color: var(--p-ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .agent-panel .nf-sub { font-size: 11.5px; color: var(--p-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .agent-panel .enter { animation: ap-enter 0.42s cubic-bezier(0.22, 1, 0.36, 1) both; }
+  @keyframes ap-enter {
+    from { opacity: 0; transform: translateY(-12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .agent-panel .enter { animation: none; }
+  }
+</style>

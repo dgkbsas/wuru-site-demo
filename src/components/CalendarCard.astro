@@ -1,0 +1,261 @@
+---
+// Artifact de Smart Workflows: OR CALENDAR (calcado del Claude design).
+// Columnas por quirófano (OR 1/2/3), grilla de horas, línea "now" con la hora,
+// y eventos con estado + barra de progreso que avanza.
+const hours = [7, 8, 9, 10, 11, 12, 13];
+const ors = ["OR 1", "OR 2", "OR 3"];
+// top/height en % de la grilla; tone: idle | active | alert
+// sin horarios en los eventos: la posición en la grilla ya dice la hora
+const events = [
+  { or: 0, t: "Infusion", meta: "Paz", top: 2, h: 13, tone: "info", prog: 100 },
+  { or: 0, t: "Hip", meta: "Ruiz", top: 17, h: 15, tone: "info", prog: 88 },
+  { or: 0, t: "Cataract", meta: "Vega", top: 50, h: 13, tone: "idle", prog: 0 },
+  { or: 0, t: "Bypass", meta: "Sosa", top: 78, h: 15, tone: "idle", prog: 0 },
+  { or: 1, t: "CT chest", meta: "Paz", top: 6, h: 13, tone: "idle", prog: 0 },
+  { or: 1, t: "MRI knee", meta: "Díaz", top: 23, h: 16, tone: "info", prog: 64 },
+  { or: 1, t: "Gallbladder", meta: "Lim", top: 62, h: 15, tone: "idle", prog: 0 },
+  { or: 1, t: "Biopsy", meta: "Ferrer", top: 82, h: 12, tone: "idle", prog: 0 },
+  { or: 2, t: "Arthroscopy", meta: "Díaz", top: 32, h: 17, tone: "alert", prog: 48 },
+  { or: 2, t: "Hernia", meta: "Blanco", top: 9, h: 14, tone: "info", prog: 100 },
+  { or: 2, t: "Endoscopy", meta: "Sáez", top: 68, h: 13, tone: "idle", prog: 0 },
+  { or: 2, t: "Cyst removal", meta: "Ruiz", top: 85, h: 12, tone: "idle", prog: 0 },
+];
+---
+
+<div class="cal" aria-hidden="true">
+  <div class="art-head">
+    <span class="art-title">OR CALENDAR · <em>Fri 13</em></span>
+    <span class="art-status"><span class="art-dot"></span>TODAY</span>
+  </div>
+
+  <div class="cal-cols">
+    <span class="cal-corner"></span>
+    {ors.map((o) => <span class="cal-or">{o}</span>)}
+  </div>
+
+  <div class="cal-body">
+    <!-- eje de horas -->
+    <div class="cal-hours">
+      {hours.map((h) => <span class="cal-h">{h}</span>)}
+    </div>
+
+    <!-- grilla con columnas por OR -->
+    <div class="cal-grid">
+      {hours.map(() => <span class="cal-rule"></span>)}
+      {ors.map((_, oi) => (
+        <div class="cal-col">
+          {events
+            .filter((e) => e.or === oi)
+            .map((e) => (
+              <span class={`cal-ev ce-${e.tone}`} style={`top:${e.top}%;height:${e.h}%`}>
+                <span class="ce-row">
+                  <span class="ce-dot"></span>
+                  <span class="ce-t">{e.t}</span>
+                </span>
+                <span class="ce-meta">{e.meta}</span>
+                {e.prog > 0 && (
+                  <span class="ce-bar"><span class="ce-fill" style={`width:${e.prog}%`}></span></span>
+                )}
+              </span>
+            ))}
+        </div>
+      ))}
+
+      <!-- línea de horario actual (sin etiqueta: la hora la da el eje) -->
+      <span class="cal-now"></span>
+    </div>
+  </div>
+</div>
+
+<script>
+  const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const root = document.querySelector<HTMLElement>(".cal");
+  // guard: si el módulo se re-ejecuta (HMR), no arrancamos un segundo loop
+  if (root && !reduce && root.dataset.calInit !== "1") {
+    root.dataset.calInit = "1";
+    // la línea "now" baja y la hora avanza; las barras de progreso crecen
+    const now = root.querySelector<HTMLElement>(".cal-now");
+    const nowT = root.querySelector<HTMLElement>(".cal-now-t");
+    const fills = Array.from(root.querySelectorAll<HTMLElement>(".ce-fill"));
+    let mins = 10 * 60 + 14; // 10:14
+    const START = 7 * 60, END = 13 * 60 + 30;
+    const STEP = 3; // minutos por tick (progreso más rápido)
+
+    const paint = () => {
+      const p = ((mins - START) / (END - START)) * 100;
+      if (now) now.style.top = `${p}%`;
+      if (nowT) nowT.textContent = `${String(Math.floor(mins / 60)).padStart(2, "0")}:${String(mins % 60).padStart(2, "0")}`;
+    };
+    paint();
+    setInterval(() => {
+      mins = mins + STEP > END ? START + 90 : mins + STEP;
+      paint();
+      fills.forEach((f) => {
+        const w = parseFloat(f.style.width) || 0;
+        if (w > 0 && w < 100) f.style.width = `${Math.min(100, w + 4)}%`;
+      });
+    }, 700);
+  }
+</script>
+
+<style>
+  .cal {
+    --p-surface: #ffffff;
+    --p-border: rgba(24, 18, 28, 0.09);
+    --p-ink: #241d2b;
+    --p-muted: #8b8593;
+    --p-label: #a8a2af;
+    --p-accent: #e0563d;
+    --p-shadow: 0 22px 50px -26px rgba(24, 18, 28, 0.45);
+
+    width: 420px;
+    background: var(--p-surface);
+    border: 1px solid var(--p-border);
+    border-radius: 18px;
+    padding: 16px 16px 14px;
+    box-shadow: var(--p-shadow);
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    font-family: "Inter", ui-sans-serif, system-ui, -apple-system, sans-serif;
+  }
+  /* cabecera de columnas */
+  .cal-cols {
+    display: grid;
+    grid-template-columns: 18px repeat(3, 1fr);
+    gap: 5px;
+    margin-bottom: 5px;
+  }
+  .cal-or {
+    font-family: ui-monospace, Menlo, monospace;
+    font-size: 8.5px;
+    letter-spacing: 0.6px;
+    color: var(--p-label);
+  }
+
+  .cal-body {
+    flex: 1;
+    display: grid;
+    grid-template-columns: 18px 1fr;
+    gap: 5px;
+    min-height: 0;
+  }
+  .cal-hours {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+  .cal-h {
+    font-family: ui-monospace, Menlo, monospace;
+    font-size: 8.5px;
+    color: var(--p-label);
+    line-height: 1;
+  }
+
+  /* grilla: 3 columnas de OR + reglas horizontales + línea now */
+  .cal-grid {
+    position: relative;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 5px;
+    border-top: 1px solid color-mix(in srgb, var(--p-ink) 7%, transparent);
+  }
+  .cal-rule {
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: color-mix(in srgb, var(--p-ink) 6%, transparent);
+    pointer-events: none;
+  }
+  .cal-rule:nth-child(1) { top: 0; }
+  .cal-rule:nth-child(2) { top: 16.6%; }
+  .cal-rule:nth-child(3) { top: 33.3%; }
+  .cal-rule:nth-child(4) { top: 50%; }
+  .cal-rule:nth-child(5) { top: 66.6%; }
+  .cal-rule:nth-child(6) { top: 83.3%; }
+  .cal-rule:nth-child(7) { top: 100%; }
+
+  .cal-col {
+    position: relative;
+    border-left: 1px solid color-mix(in srgb, var(--p-ink) 7%, transparent);
+  }
+
+  /* eventos */
+  .cal-ev {
+    position: absolute;
+    left: 2px;
+    right: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 1px;
+    padding: 4px 5px;
+    border-radius: 6px;
+    border: 1px solid;
+    overflow: hidden;
+    box-sizing: border-box;
+  }
+  .ce-row { display: flex; align-items: center; gap: 4px; min-width: 0; }
+  .ce-dot { width: 4px; height: 4px; border-radius: 50%; flex-shrink: 0; }
+  .ce-t {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--p-ink);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .ce-meta {
+    font-family: ui-monospace, Menlo, monospace;
+    font-size: 9px;
+    color: var(--p-muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .ce-bar {
+    height: 2.5px;
+    border-radius: 2px;
+    background: color-mix(in srgb, var(--p-ink) 10%, transparent);
+    margin-top: 2px;
+    overflow: hidden;
+  }
+  .ce-fill { display: block; height: 100%; border-radius: 2px; transition: width 0.65s linear; }
+
+  .ce-idle { background: #fafafa; border-color: color-mix(in srgb, var(--p-ink) 9%, transparent); }
+  .ce-idle .ce-dot { background: color-mix(in srgb, var(--p-ink) 22%, transparent); }
+  .ce-info { background: #eef4fc; border-color: #cfe0f5; }
+  .ce-info .ce-dot { background: #5b8fd0; }
+  .ce-info .ce-fill { background: #5b8fd0; }
+  .ce-alert {
+    background: #fdeae5;
+    border-color: color-mix(in srgb, var(--p-accent) 45%, transparent);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--p-accent) 10%, transparent);
+  }
+  .ce-alert .ce-dot { background: var(--p-accent); }
+  .ce-alert .ce-fill { background: var(--p-accent); }
+
+  /* línea de horario actual */
+  .cal-now {
+    position: absolute;
+    left: -20px;
+    right: 0;
+    height: 1.5px;
+    background: var(--p-accent);
+    z-index: 4;
+    transition: top 0.65s linear;
+    pointer-events: none;
+  }
+  .cal-now-t {
+    position: absolute;
+    left: -2px;
+    top: -12px;
+    font-family: ui-monospace, Menlo, monospace;
+    font-size: 9px;
+    font-weight: 700;
+    color: var(--p-accent);
+    background: var(--p-surface);
+    padding: 0 2px;
+  }
+</style>

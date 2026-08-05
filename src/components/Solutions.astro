@@ -1,0 +1,104 @@
+---
+// Sección Solutions: las ÁREAS de Wúru — el otro eje de la matriz. Cada card
+// linkea a la página de esa solución y muestra qué ejes participan.
+import { solutions } from "../data/solutions";
+---
+
+<div class="sols">
+  {
+    solutions.map((s) => (
+      <div class="sol">
+        <span class="sol-head">
+          <span class="sol-name">{s.name}</span>
+        </span>
+        <span class="sol-sum">{s.summary}</span>
+        <span class="sol-axes">
+          {(["workflow", "embedded", "standalone"] as const).map((k) => (
+            <span class={`sol-ax ax-${s.axes[k]}`}>
+              <span class="ax-mark"></span>{k}
+            </span>
+          ))}
+        </span>
+      </div>
+    ))
+  }
+</div>
+
+<style lang="scss">
+  .sols {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 14px;
+    margin-top: 36px;
+  }
+  /* todas del mismo tamaño: son pares, ninguna tiene más jerarquía
+     (5 items → 2 + 2 + 1, la última sola en la última fila) */
+
+  .sol {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 18px 19px 16px;
+    border-radius: 16px;
+    text-decoration: none;
+    background: color-mix(in srgb, var(--fg) 4%, transparent);
+    border: 1px solid color-mix(in srgb, var(--fg) 12%, transparent);
+  }
+
+  .sol-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+  }
+  .sol-name {
+    font-size: 19px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    color: var(--fg);
+  }
+  .sol-sum {
+    flex: 1;
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--fg-muted);
+  }
+
+  /* marcas de eje: lleno = central, hueco = puntual, tenue = no participa */
+  .sol-axes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    padding-top: 12px;
+    border-top: 1px solid color-mix(in srgb, var(--fg) 10%, transparent);
+  }
+  .sol-ax {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+    font-size: 10px;
+    letter-spacing: 0.4px;
+    color: var(--fg-muted);
+  }
+  .ax-mark {
+    width: 7px;
+    height: 7px;
+    border-radius: 2px;
+    transform: rotate(45deg);
+    border: 1.5px solid currentColor;
+  }
+  .ax-core {
+    color: var(--accent);
+    .ax-mark { background: var(--accent); border-color: var(--accent); }
+  }
+  .ax-light .ax-mark { background: transparent; }
+  .ax-none {
+    opacity: 0.35;
+    .ax-mark { border-style: dotted; }
+  }
+
+  @media only screen and (max-width: 1024px) {
+    .sols { grid-template-columns: 1fr; }
+  }
+</style>

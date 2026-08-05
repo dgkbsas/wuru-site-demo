@@ -1,0 +1,172 @@
+---
+// Artifact de Smart Workflows: LIVE METRICS. Los números son un odómetro por
+// dígito: sólo rueda el dígito que cambia; al pasar de 9 arrastra al siguiente.
+const kpis = [
+  { key: "cases", label: "CASES AUTOMATED", start: 17123, unit: "" },
+  { key: "mins", label: "MINUTES SAVED · TODAY", start: 13283, unit: "" },
+  { key: "conf", label: "CONFLICTS RESOLVED", start: 318, unit: "" },
+  { key: "today", label: "CASES TODAY", start: 47, unit: "" },
+  { key: "ontime", label: "ON-TIME", start: 82, unit: "%" },
+  { key: "util", label: "OR UTILIZATION", start: 97, unit: "%" },
+];
+---
+
+<div class="analytics" aria-hidden="true">
+  <div class="art-head">
+    <span class="art-title"><span class="art-dot"></span>LIVE METRICS</span>
+  </div>
+  <div class="an-kpis">
+    {kpis.map((k) => (
+      <div class="an-kpi">
+        <span class="an-label">{k.label}</span>
+        <span class="an-val">
+          <span class="an-num" data-key={k.key} data-val={k.start}>
+            {String(k.start).split("").map((d) => (
+              <span class="an-d"><span>{d}</span></span>
+            ))}
+          </span>
+          {k.unit && <span class="an-unit">{k.unit}</span>}
+        </span>
+      </div>
+    ))}
+  </div>
+</div>
+
+<script>
+  const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const root = document.querySelector<HTMLElement>(".analytics");
+  // guard: si el módulo se re-ejecuta (HMR), no arrancamos un segundo loop
+  if (root && !reduce && root.dataset.anInit !== "1") {
+    root.dataset.anInit = "1";
+    const nums = Array.from(root.querySelectorAll<HTMLElement>(".an-num"));
+
+    // rueda un dígito: el viejo sale arriba, el nuevo entra desde abajo
+    const rollDigit = (slot: HTMLElement, digit: string) => {
+      const cur = slot.firstElementChild as HTMLElement | null;
+      if (!cur || cur.textContent === digit) return;
+      const next = document.createElement("span");
+      next.textContent = digit;
+      slot.appendChild(next);
+      void next.offsetHeight; // fija el estado inicial antes de transicionar
+      let done = false;
+      const finish = () => {
+        if (done) return;
+        done = true;
+        cur.remove();
+        next.style.transition = "none";
+        next.style.transform = "none";
+      };
+      cur.style.transition = "transform 0.42s cubic-bezier(0.22,1,0.36,1)";
+      next.style.transition = "transform 0.42s cubic-bezier(0.22,1,0.36,1)";
+      cur.style.transform = "translateY(-100%)";
+      next.style.transform = "translateY(-100%)";
+      next.addEventListener("transitionend", finish, { once: true });
+      setTimeout(finish, 800);
+    };
+
+    // pinta un valor nuevo: sólo ruedan los dígitos que cambian
+    const setValue = (el: HTMLElement, value: number) => {
+      const digits = String(value).split("");
+      let slots = Array.from(el.querySelectorAll<HTMLElement>(".an-d"));
+      // si crece de largo (99 → 100) agregamos un slot al frente
+      while (slots.length < digits.length) {
+        const s = document.createElement("span");
+        s.className = "an-d";
+        s.innerHTML = "<span>0</span>";
+        el.insertBefore(s, el.firstChild);
+        slots = Array.from(el.querySelectorAll<HTMLElement>(".an-d"));
+      }
+      // el último dígito primero, y los de la izquierda con un pequeño retraso
+      // (así se ve el arrastre cuando pasa de 9)
+      digits.forEach((d, i) => {
+        const slot = slots[i];
+        if (!slot) return;
+        const delay = (digits.length - 1 - i) * 55;
+        setTimeout(() => rollDigit(slot, d), delay);
+      });
+      el.dataset.val = String(value);
+    };
+
+    // cambia DE A UNO (round-robin); contadores +1, los % oscilan
+    let ni = 0;
+    setInterval(() => {
+      const el = nums[ni % nums.length];
+      ni++;
+      const key = el.dataset.key;
+      const cur = Number(el.dataset.val);
+      let to: number;
+      if (key === "ontime") to = cur === 82 ? 81 + Math.round(Math.random() * 2) : 82;
+      else if (key === "util") to = cur === 97 ? 96 + Math.round(Math.random() * 2) : 97;
+      else to = cur + 1;
+      if (to === cur) to = cur + 1;
+      setValue(el, to);
+    }, 900);
+  }
+</script>
+
+<style>
+  .analytics {
+    --p-surface: #ffffff;
+    --p-border: rgba(24, 18, 28, 0.09);
+    --p-ink: #241d2b;
+    --p-muted: #8b8593;
+    --p-label: #a8a2af;
+    --p-shadow: 0 22px 50px -26px rgba(24, 18, 28, 0.45);
+
+    width: 300px;
+    background: var(--p-surface);
+    border: 1px solid var(--p-border);
+    border-radius: 18px;
+    /* padding-left extra: su contenido queda libre del solape de la card de adelante */
+    padding: 17px 20px 20px 54px;
+    box-shadow: var(--p-shadow);
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    font-family: "Inter", ui-sans-serif, system-ui, -apple-system, sans-serif;
+  }
+
+  /* títulos y números alineados a la izquierda */
+  .an-kpis {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: flex-start;
+    text-align: left;
+  }
+  .an-kpi { display: flex; flex-direction: column; align-items: flex-start; gap: 1px; }
+  .an-label {
+    font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+    font-size: 9.5px;
+    letter-spacing: 1.3px;
+    color: var(--p-label);
+    text-align: left;
+  }
+  .an-val { display: flex; align-items: baseline; }
+  .an-num {
+    display: inline-flex;
+    font-size: 27px;
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    color: var(--p-ink);
+    font-variant-numeric: tabular-nums;
+  }
+  .an-unit { font-size: 15px; font-weight: 600; color: var(--p-muted); margin-left: 2px; }
+</style>
+
+<!-- los dígitos nuevos los crea el JS → estilos globales bajo .analytics -->
+<style is:global>
+  /* cada dígito es un slot que recorta: sólo rueda el que cambia */
+  .analytics .an-d {
+    display: block;
+    overflow: hidden;
+    height: 1.04em;
+    line-height: 1.04;
+  }
+  .analytics .an-d > span {
+    display: block;
+    line-height: 1.04;
+    font-variant-numeric: tabular-nums;
+  }
+</style>

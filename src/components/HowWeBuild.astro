@@ -1,0 +1,76 @@
+---
+// Sección How we build: cómo construimos (copy del Notion 04, con el "most
+// AI-native company" ya reformulado). Tres pilares.
+const pillars = [
+  {
+    t: "We become experts in your workflow.",
+    d: "Every product starts by understanding how work actually happens. We immerse ourselves in workflows, people and operations to build technology that fits the realities of healthcare while remaining scalable across institutions.",
+  },
+  {
+    t: "We build together.",
+    d: "Healthcare professionals, biomedical engineers, product teams and developers build side by side, combining clinical insight with technical expertise.",
+  },
+  {
+    t: "We build through design partnerships.",
+    d: "Every solution evolves alongside the institutions that use it. We listen, build and iterate continuously, shaping our products within real healthcare operations.",
+  },
+];
+---
+
+<div class="hwb">
+  {
+    pillars.map((p, i) => (
+      <div class="hwb-item">
+        <span class="hwb-n">{String(i + 1).padStart(2, "0")}</span>
+        <h3>{p.t}</h3>
+        <p>{p.d}</p>
+      </div>
+    ))
+  }
+</div>
+
+<style>
+  /* en la columna derecha del split se leen mejor como filas */
+  .hwb {
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+    margin-top: 36px;
+  }
+  .hwb-item {
+    display: grid;
+    grid-template-columns: 40px 1fr;
+    gap: 4px 14px;
+    padding-top: 16px;
+    border-top: 1px solid color-mix(in srgb, var(--fg) 16%, transparent);
+  }
+  .hwb-item h3 { grid-column: 2; }
+  .hwb-item p { grid-column: 2; }
+  .hwb-n {
+    grid-row: 1 / span 2;
+    display: block;
+    font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+    font-size: 11px;
+    letter-spacing: 1.4px;
+    color: var(--accent);
+    margin-bottom: 12px;
+  }
+  .hwb-item h3 {
+    margin: 0 0 8px;
+    font-size: 17px;
+    font-weight: 600;
+    line-height: 1.25;
+    letter-spacing: -0.01em;
+    color: var(--fg);
+  }
+  .hwb-item p {
+    margin: 0;
+    font-size: 14px;
+    line-height: 1.6;
+    color: var(--fg-muted);
+  }
+
+  @media only screen and (max-width: 1024px) {
+    .hwb { gap: 20px; }
+  }
+</style>

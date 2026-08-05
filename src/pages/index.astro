@@ -6,7 +6,18 @@ import Header from "../components/Header/Header.astro";
 import Hero from "../components/Hero/Hero.astro";
 import DeckSection from "../components/DeckSection.astro";
 import Clients from "../components/Clients.astro";
+import WuruLayers from "../components/WuruLayers.astro";
+import LiveStatus from "../components/LiveStatus.astro";
+import PlatformPinned from "../components/PlatformPinned.astro";
+import SolutionsPinned from "../components/SolutionsPinned.astro";
+import FinalCta from "../components/FinalCta.astro";
 import Footer from "../components/Footer/Footer.astro";
+
+const wuruTitle =
+  `<span class='t-the'>The</span>` +
+  `<span class='t-hero hl'>Intelligence Layer</span>` +
+  `<span class='t-sub'>for every healthcare operation</span>`;
+
 ---
 
 <Layout title="Wúru">
@@ -18,56 +29,97 @@ import Footer from "../components/Footer/Footer.astro";
 
   <DeckSection
     id="wuru"
-    eyebrow="Wúru"
-    title="Wúru is the operating system for healthcare operations."
-    paragraphs={[
-      "Every interaction expands what your teams can delegate while keeping people at the center of every decision.",
-    ]}
+    center
+    dwell={1.2}
+    title={wuruTitle}
+    paragraphs={["Every interaction expands what your teams can delegate — <strong>people stay at the center</strong>."]}
   >
-    <Clients />
+    <WuruLayers slot="bg" />
+    <div class="wuru-live">
+      <LiveStatus />
+    </div>
   </DeckSection>
 
-  <DeckSection
-    id="plataforma"
-    eyebrow="Platform"
-    title="Modular by design."
-    paragraphs={[
-      "A modular platform that structures workflows, orchestrates execution and enables AI agents to operate with the context, knowledge and governance of your institution.",
-    ]}
-  />
+  <PlatformPinned />
 
-  <DeckSection
-    id="smart-workflows"
-    eyebrow="Smart Workflows"
-    title="Workflows are the operational foundation of Wúru."
-    paragraphs={[
-      "They structure institutional processes into digital workflows that define responsibilities, permissions, business rules and shared knowledge.",
-      "Every workflow lives in the cloud, evolves with your institution and creates a single operational source of truth that connects people, systems and AI agents.",
-    ]}
-  />
+  <!-- Solutions y Security viven en un solo bloque pineado: el fondo y el
+       switcher quedan fijos y el contenido pasa de una a la otra -->
+  <SolutionsPinned />
 
-  <DeckSection
-    id="embedded-agents"
-    eyebrow="Embedded Agents"
-    title="Embedded agents operate within the workflow."
-    paragraphs={[
-      "They are invoked at the right moment to structure information, summarize, recommend, predict and execute operational tasks.",
-      "Every agent works with the workflow's context, permissions, tools and institutional knowledge, allowing it to assist naturally within the daily operation.",
-    ]}
-  />
-
-  <DeckSection
-    id="standalone-agents"
-    eyebrow="Standalone Agents"
-    title="Standalone agents specialize in complete professional tasks."
-    paragraphs={[
-      "They interact directly with users, understand institutional context and deliver outcomes aligned with your organization's principles, standards and style.",
-      "From clinical documentation to operational analysis, professionals simply describe what they need, delegate execution and supervise the result.",
-    ]}
-  />
+  <!-- cierre unificado: CTA + clientes + partnerships -->
+  <section class="closing snap-section">
+    <div class="closing-in">
+      <FinalCta />
+      <Clients />
+    </div>
+  </section>
 
   <Footer />
 </Layout>
+
+<style>
+  /* card "WÚRU OS · LIVE" dentro del statement de WÚRU: centrada, entra al final */
+  .wuru-live {
+    margin: 44px auto 0;
+    width: max-content;
+    max-width: 100%;
+    opacity: 0;
+    transform: translateY(18px);
+    transition:
+      opacity 0.5s ease,
+      transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+    transition-delay: 0.58s;
+  }
+  :global(.deck-section.is-active) .wuru-live {
+    opacity: 1;
+    transform: none;
+  }
+  @media only screen and (max-width: 1024px) {
+    .wuru-live {
+      opacity: 1;
+      transform: none;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .wuru-live {
+      opacity: 1;
+      transform: none;
+      transition: none;
+    }
+  }
+
+  /* el cierre también se monta sobre la sección anterior: plano propio (un poco
+     más profundo que el de la sección de arriba) + sombra hacia arriba */
+  .closing {
+    position: relative;
+    z-index: 32;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: clamp(64px, 10vw, 120px) var(--gutter);
+    margin-top: clamp(-14vh, -10vh, -60px);
+    background: var(--section-fill, color-mix(in srgb, var(--section-bg) 92%, var(--fg)));
+    box-shadow: 0 -26px 60px -22px rgba(0, 0, 0, 0.42);
+  }
+  .closing-in {
+    width: 100%;
+    max-width: 960px;
+  }
+  /* separación entre el CTA y la prueba social (clientes + partnerships) */
+  .closing :global(.clients) {
+    margin-top: clamp(56px, 8vh, 96px);
+    padding-top: clamp(40px, 6vh, 64px);
+    border-top: 1px solid color-mix(in srgb, var(--fg) 12%, transparent);
+  }
+  .closing :global(.clients-marquee) {
+    margin-inline: auto;
+  }
+  .closing :global(.clients-row) {
+    justify-content: center;
+  }
+</style>
 
 <script>
   // Sincronía del picker + deblur de secciones con el scroll
@@ -75,21 +127,31 @@ import Footer from "../components/Footer/Footer.astro";
     (entries) => {
       entries.forEach((e) => {
         if (!e.isIntersecting) return;
-        const id = (e.target as HTMLElement).classList.contains("hero") ? "inicio" : e.target.id;
+        // se observa el stage (100vh), así que el id lo da la sección contenedora
+        const host = (e.target as HTMLElement).closest<HTMLElement>(".hero, .deck-section");
+        const id = host?.classList.contains("hero") ? "inicio" : host?.id;
         if (id) window.dispatchEvent(new CustomEvent("deckchange", { detail: { id } }));
       });
     },
     { threshold: 0.5 }
   );
-  document
-    .querySelectorAll(".hero, #wuru, #plataforma, #smart-workflows, #embedded-agents, #standalone-agents")
-    .forEach((el) => io.observe(el));
+  // Se observa el .ds-stage cuando existe: una sección con dwell mide más de
+  // 100vh, y con threshold 0.5 sobre la sección nunca llegaría a activarse.
+  // Los bloques pineados (#plataforma, #solutions-security) despachan su propio
+  // deckchange internamente.
+  document.querySelectorAll<HTMLElement>(".hero, #wuru").forEach((el) => {
+    io.observe(el.querySelector<HTMLElement>(".ds-stage") ?? el);
+  });
 
-  // Deblur → nítido del contenido de la sección activa
+  // Deblur → nítido del contenido de la sección activa.
+  // Entrada de UNA SOLA VÍA: una vez que la sección entró y animó, queda fija.
+  // Ninguna sección anima la salida.
   const deckSections = document.querySelectorAll<HTMLElement>(".deck-section");
   window.addEventListener("deckchange", (e) => {
     const id = (e as CustomEvent).detail?.id;
-    deckSections.forEach((s) => s.classList.toggle("is-active", s.id === id));
+    deckSections.forEach((s) => {
+      if (s.id === id) s.classList.add("is-active");
+    });
   });
 
   // Click en el picker → scroll suave a la sección

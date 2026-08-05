@@ -1,10 +1,18 @@
 /* ===== Temas (switcher) ===== */
 :root,
 [data-theme="dark"] {
-  --page-bg: linear-gradient(90deg, #360124, #290a24, #1d0e21, #150f1a, #0e0e0e);
+  --page-bg: linear-gradient(
+    90deg,
+    #360124,
+    #290a24,
+    #1d0e21,
+    #150f1a,
+    #0e0e0e
+  );
   /* margen lateral que cap­a el contenido a un ancho máx (1600px), sin tocar bg/glass */
   --gutter: max(48px, calc((100vw - 1600px) / 2));
   --fg: #f1f1f1;
+  --section-bg: #1a1220;
   --fg-muted: rgba(241, 241, 241, 0.66);
   --accent: #ec5a3d;
   --glass-bg: rgba(255, 255, 255, 0.06);
@@ -19,6 +27,7 @@
 [data-theme="midnight"] {
   --page-bg: linear-gradient(100deg, #141a44, #10112e, #0d0b1c, #0a0a12);
   --fg: #eef0f8;
+  --section-bg: #161a3d;
   --fg-muted: rgba(238, 240, 248, 0.66);
   --accent: #ff6344;
   --glass-bg: rgba(255, 255, 255, 0.06);
@@ -30,6 +39,7 @@
 [data-theme="teal"] {
   --page-bg: linear-gradient(120deg, #093c34, #0a2a28, #0b1a1a, #08100f);
   --fg: #eef5f2;
+  --section-bg: #0d2a26;
   --fg-muted: rgba(238, 245, 242, 0.66);
   --accent: #ff6344;
   --glass-bg: rgba(255, 255, 255, 0.06);
@@ -39,10 +49,14 @@
 
 /* Oscuro con luz suave desde la izquierda (menos lumínica) */
 [data-theme="dawn"] {
-  --page-bg:
-    radial-gradient(115% 115% at -5% 42%, rgba(236, 90, 61, 0.16), transparent 45%),
+  --page-bg: radial-gradient(
+      115% 115% at -5% 42%,
+      rgba(236, 90, 61, 0.16),
+      transparent 45%
+    ),
     linear-gradient(90deg, #240a1c, #1a0d1e, #150f1a, #0e0e0e);
   --fg: #f6f1ee;
+  --section-bg: #1f1220;
   --fg-muted: rgba(246, 241, 238, 0.66);
   --accent: #ff6344;
   --glass-bg: rgba(255, 255, 255, 0.06);
@@ -54,6 +68,7 @@
 [data-theme="light"] {
   --page-bg: linear-gradient(120deg, #f2d6e8 0%, #e7c6e6 45%, #d9c5f1 100%);
   --fg: #26101d;
+  --section-bg: #ece0ee;
   --fg-muted: rgba(38, 16, 29, 0.62);
   --accent: #c0392b;
   --glass-bg: rgba(40, 12, 30, 0.08);
@@ -67,10 +82,14 @@
 
 /* Claro que oscurece mínimamente hacia arriba-derecha */
 [data-theme="light-tr"] {
-  --page-bg:
-    radial-gradient(80% 80% at 100% 0%, rgba(40, 18, 32, 0.2), transparent 55%),
+  --page-bg: radial-gradient(
+      80% 80% at 100% 0%,
+      rgba(40, 18, 32, 0.2),
+      transparent 55%
+    ),
     linear-gradient(135deg, #f7e8f0, #efdff0);
   --fg: #26101d;
+  --section-bg: #efe4ef;
   --fg-muted: rgba(38, 16, 29, 0.62);
   --accent: #c0392b;
   --glass-bg: rgba(40, 12, 30, 0.08);
@@ -84,12 +103,24 @@
 
 /* Claro con manchas magenta/rojo difuminadas (mesh) */
 [data-theme="blush"] {
-  --page-bg:
-    radial-gradient(60% 55% at 6% 102%, rgba(198, 42, 90, 0.62), transparent 60%),
-    radial-gradient(45% 45% at 102% 92%, rgba(190, 40, 70, 0.3), transparent 55%),
-    radial-gradient(55% 55% at 90% 2%, rgba(130, 70, 150, 0.16), transparent 60%),
+  --page-bg: radial-gradient(
+      60% 55% at 6% 102%,
+      rgba(198, 42, 90, 0.62),
+      transparent 60%
+    ),
+    radial-gradient(
+      45% 45% at 102% 92%,
+      rgba(190, 40, 70, 0.3),
+      transparent 55%
+    ),
+    radial-gradient(
+      55% 55% at 90% 2%,
+      rgba(130, 70, 150, 0.16),
+      transparent 60%
+    ),
     linear-gradient(180deg, #edeaee, #e6e1e6 55%, #ddd6dd);
   --fg: #241019;
+  --section-bg: #e4dde4;
   --fg-muted: rgba(36, 16, 25, 0.6);
   --accent: #c62a5a;
   --glass-bg: rgba(40, 12, 30, 0.06);
@@ -99,6 +130,225 @@
   --cube-brightness: 1.05;
   --icon-filter: brightness(0);
   --logo-filter: brightness(0);
+}
+
+/* Blanco pastel suave, con degradé un poco más presente */
+[data-theme="pastel"] {
+  --page-bg: radial-gradient(
+      75% 60% at 90% 6%,
+      rgba(170, 140, 210, 0.2),
+      transparent 60%
+    ),
+    radial-gradient(65% 55% at 6% 94%, rgba(210, 140, 170, 0.16), transparent 58%),
+    linear-gradient(
+      128deg,
+      #fefdff 0%,
+      #f7f2f9 34%,
+      #efe8f3 62%,
+      #f8f2f6 86%,
+      #fefcfe 100%
+    );
+  --fg: #241019;
+  --section-bg: #f4eff6;
+  --fg-muted: rgba(36, 16, 25, 0.6);
+  --accent: #d8462b;
+  --glass-bg: rgba(40, 12, 30, 0.05);
+  --glass-border: rgba(40, 12, 30, 0.1);
+  --btn-ghost-border: rgba(36, 16, 25, 0.24);
+  --panel-backing: rgba(20, 8, 16, 0.04);
+  --cube-brightness: 1.06;
+  --icon-filter: brightness(0);
+  --logo-filter: brightness(0);
+}
+
+/* Pastel crema (blanco amarillento, con degradé) */
+[data-theme="cream"] {
+  --page-bg: linear-gradient(
+      160deg,
+      #fffefb 0%,
+      #fefaf1 40%,
+      #fcf6ea 70%,
+      #fffdf8 100%
+    ),
+    radial-gradient(70% 60% at 88% 8%, rgba(226, 190, 128, 0.18), transparent 62%);
+  --fg: #241c12;
+  --section-bg: #faf4e8;
+  --fg-muted: rgba(36, 28, 18, 0.62);
+  --accent: #d8562b;
+  --glass-bg: rgba(40, 28, 14, 0.05);
+  --glass-border: rgba(40, 28, 14, 0.11);
+  --btn-ghost-border: rgba(36, 28, 18, 0.24);
+  --panel-backing: rgba(30, 20, 10, 0.04);
+  --icon-filter: brightness(0);
+  --logo-filter: brightness(0);
+}
+
+/* Pastel magenta (mismo aire que crema, con degradé más marcado) */
+[data-theme="rose"] {
+  --page-bg: radial-gradient(
+      80% 65% at 92% 4%,
+      rgba(206, 46, 140, 0.34),
+      transparent 62%
+    ),
+    radial-gradient(70% 60% at 4% 96%, rgba(150, 40, 160, 0.24), transparent 60%),
+    linear-gradient(
+      158deg,
+      #fff8fc 0%,
+      #fbe4f2 34%,
+      #f4cfe8 62%,
+      #fbe8f4 88%,
+      #fff9fd 100%
+    );
+  --fg: #2a0f22;
+  --section-bg: #f6ddee;
+  --fg-muted: rgba(42, 15, 34, 0.6);
+  --accent: #c62a7a;
+  --glass-bg: rgba(45, 12, 34, 0.05);
+  --glass-border: rgba(45, 12, 34, 0.11);
+  --btn-ghost-border: rgba(42, 15, 34, 0.24);
+  --panel-backing: rgba(30, 10, 24, 0.04);
+  --icon-filter: brightness(0);
+  --logo-filter: brightness(0);
+}
+
+/* ── Temas con dots desenfocados por detrás ── */
+/* Dots magenta/violeta sobre claro */
+[data-theme="dots"] {
+  --page-bg: linear-gradient(180deg, #f4f1f5, #ece7ee 60%, #e6e0e9);
+  --fg: #241019;
+  --section-bg: #e8e2ea;
+  --fg-muted: rgba(36, 16, 25, 0.6);
+  --accent: #c62a5a;
+  --glass-bg: rgba(40, 12, 30, 0.06);
+  --glass-border: rgba(40, 12, 30, 0.12);
+  --btn-ghost-border: rgba(36, 16, 25, 0.26);
+  --panel-backing: rgba(20, 8, 16, 0.05);
+  --icon-filter: brightness(0);
+  --logo-filter: brightness(0);
+  /* paleta de los dots */
+  --dot-a: rgba(198, 42, 90, 0.5);
+  --dot-b: rgba(130, 70, 190, 0.4);
+  --dot-c: rgba(226, 110, 90, 0.36);
+  --dots-blur: 104px;
+}
+
+/* Dots teal/verde sobre claro */
+[data-theme="dots-teal"] {
+  --page-bg: linear-gradient(180deg, #f0f5f3, #e6efec 60%, #dfeae7);
+  --fg: #10231f;
+  --section-bg: #e2ecea;
+  --fg-muted: rgba(16, 35, 31, 0.6);
+  --accent: #1f8f78;
+  --glass-bg: rgba(10, 35, 30, 0.06);
+  --glass-border: rgba(10, 35, 30, 0.12);
+  --btn-ghost-border: rgba(16, 35, 31, 0.26);
+  --panel-backing: rgba(8, 28, 24, 0.05);
+  --icon-filter: brightness(0);
+  --logo-filter: brightness(0);
+  --dot-a: rgba(31, 143, 120, 0.45);
+  --dot-b: rgba(70, 170, 200, 0.36);
+  --dot-c: rgba(200, 210, 120, 0.32);
+  --dots-blur: 104px;
+}
+
+/* Muchos dots, y se mueven con el scroll.
+   Letras y accent iguales a "blurred dots" (el violeta se queda sólo en los
+   dots del fondo, no en la tipografía). */
+[data-theme="dots-many"] {
+  --page-bg: linear-gradient(180deg, #f5f2f6, #ece8ef 55%, #e4dfe8);
+  --fg: #241019;
+  --section-bg: #e7e2ec;
+  --fg-muted: rgba(36, 16, 25, 0.6);
+  --accent: #c62a5a;
+  --glass-bg: rgba(40, 12, 30, 0.06);
+  --glass-border: rgba(40, 12, 30, 0.12);
+  --btn-ghost-border: rgba(36, 16, 25, 0.26);
+  --panel-backing: rgba(20, 8, 16, 0.05);
+  --icon-filter: brightness(0);
+  --logo-filter: brightness(0);
+  --dot-a: rgba(123, 74, 216, 0.4);
+  --dot-b: rgba(214, 70, 140, 0.34);
+  --dot-c: rgba(80, 170, 220, 0.32);
+  --dots-blur: 82px;
+}
+
+/* Capa de dots: sólo visible en los temas de dots */
+.page-dots {
+  position: fixed;
+  inset: -12vh -8vw;
+  z-index: -1;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.5s ease;
+  filter: blur(var(--dots-blur, 64px));
+}
+:root[data-theme="dots"] .page-dots,
+:root[data-theme="dots-teal"] .page-dots,
+:root[data-theme="dots-many"] .page-dots {
+  opacity: 1;
+}
+.page-dots span {
+  position: absolute;
+  border-radius: 50%;
+  display: block;
+  /* quietos: no se mueven ni con el scroll ni por su cuenta */
+}
+/* grupo 1 (se mueve hacia arriba con el scroll) */
+.page-dots span:nth-child(1) {
+  width: 30vw;
+  height: 30vw;
+  left: 6%;
+  top: 8%;
+  background: var(--dot-a);
+}
+.page-dots span:nth-child(2) {
+  width: 22vw;
+  height: 22vw;
+  right: 10%;
+  top: 22%;
+  background: var(--dot-b);
+}
+.page-dots span:nth-child(3) {
+  width: 26vw;
+  height: 26vw;
+  left: 22%;
+  bottom: 6%;
+  background: var(--dot-c);
+}
+/* grupo 2: sólo en "dots-many" */
+.page-dots span:nth-child(n + 4) {
+  display: none;
+}
+:root[data-theme="dots-many"] .page-dots span:nth-child(n + 4) {
+  display: block;
+}
+.page-dots span:nth-child(4) {
+  width: 16vw;
+  height: 16vw;
+  right: 26%;
+  bottom: 16%;
+  background: var(--dot-a);
+}
+.page-dots span:nth-child(5) {
+  width: 12vw;
+  height: 12vw;
+  left: 44%;
+  top: 4%;
+  background: var(--dot-b);
+}
+.page-dots span:nth-child(6) {
+  width: 18vw;
+  height: 18vw;
+  left: -4%;
+  top: 46%;
+  background: var(--dot-c);
+}
+.page-dots span:nth-child(7) {
+  width: 14vw;
+  height: 14vw;
+  right: 2%;
+  bottom: 38%;
+  background: var(--dot-b);
 }
 
 * {
@@ -114,33 +364,31 @@ html {
   height: 100%;
   width: 100%;
   min-width: 340px;
-  font-family:
-  system-ui,
-  -apple-system,
-  BlinkMacSystemFont,
-  "Segoe UI",
-  Roboto,
-  Oxygen,
-  Ubuntu,
-  Cantarell,
-  "Open Sans",
-  "Helvetica Neue",
-  sans-serif;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
 
   display: flex;
   align-items: flex-start;
   justify-content: center;
   margin: 0;
   scroll-behavior: smooth;
-  /* snap: siempre asienta en una sección (nunca a medio camino) */
-  scroll-snap-type: y mandatory;
+  /* snap: asienta en las secciones full-height (proximity para no forzar snap
+     dentro del bloque Platform pineado, que scrollea libre) */
+  scroll-snap-type: y proximity;
 }
 
 .snap-section {
-  min-height: 100vh;
+  /* full-screen en pantallas normales; con tope en monitores muy altos
+     (no crece indiscriminadamente) */
+  height: min(100vh, 1000px);
   scroll-snap-align: start;
 }
-
+@media only screen and (max-width: 1024px) {
+  .snap-section {
+    height: auto;
+    min-height: 100vh;
+  }
+}
 
 body {
   margin: 0;
@@ -150,10 +398,9 @@ body {
   position: relative;
 }
 
-a{
+a {
   text-decoration: none;
   border: none;
-
 }
 
 /* Fondo real: capa fija al viewport (no scrollea nunca) */
@@ -188,4 +435,85 @@ a{
 }
 :root[data-glow="3"] .ambient-glow {
   opacity: 1;
+}
+
+/* ─────────────────────────────────────────────────────────────
+   Header unificado de los artifacts (cards "producto" del deck):
+   misma fuente, tamaño y espaciado en todos.
+   ───────────────────────────────────────────────────────────── */
+$art-mono: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
+
+.art-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 13px;
+}
+.art-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-family: $art-mono;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 1.3px;
+  color: #241d2b;
+  white-space: nowrap;
+}
+.art-title em {
+  font-style: normal;
+  color: #e0563d;
+}
+.art-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: $art-mono;
+  font-size: 9.5px;
+  font-weight: 500;
+  letter-spacing: 0.8px;
+  color: #8b8593;
+  white-space: nowrap;
+}
+.art-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  background: #37b26a;
+  color: #37b26a;
+  animation: art-dot-pulse 1.8s ease-out infinite;
+}
+.art-dot.is-violet {
+  background: #6f4fd0;
+  color: #6f4fd0;
+}
+.art-dot.is-accent {
+  background: #e0563d;
+  color: #e0563d;
+}
+.art-dot.is-rec {
+  background: #d8452c;
+  color: #d8452c;
+  animation: art-dot-rec 1.2s steps(1) infinite;
+}
+@keyframes art-dot-pulse {
+  0% {
+    box-shadow: 0 0 0 0 currentColor;
+  }
+  70%,
+  100% {
+    box-shadow: 0 0 0 6px transparent;
+  }
+}
+@keyframes art-dot-rec {
+  50% {
+    opacity: 0.25;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .art-dot {
+    animation: none;
+  }
 }

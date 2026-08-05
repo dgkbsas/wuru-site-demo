@@ -1,34 +1,12 @@
 ---
 import HeroText from "./HeroText.astro";
-import boxPanel from "../../assets/videos/boxpanel.webm";
-import boxPanelGif from "../../assets/videos/boxpanel-low.gif";
+import heroScene from "../../assets/images/hero-scene.png";
 ---
 
 <script>
-  import { animate, hover, press } from "motion";
-
-  document.addEventListener("DOMContentLoaded", () => {
-    const isSafari = () => {
-      const userAgent = navigator.userAgent;
-      return /Safari/.test(userAgent) && !/Chrome/.test(userAgent);
-    };
-
-    const heroVideo = document.getElementById("hero-video");
-    const heroGif = document.getElementById("hero-gif");
-
-    if (heroGif && heroVideo) {
-      if (isSafari()) {
-        heroGif.style.display = "block";
-        heroVideo.style.display = "none";
-      } else {
-        heroGif.style.display = "none";
-        heroVideo.style.display = "block";
-      }
-    }
-  });
+  import { animate, hover, press, scroll } from "motion";
 
   const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  const hero = document.querySelector(".hero");
 
   // Springs en botones (hover + press con física)
   if (!reduce) {
@@ -48,36 +26,47 @@ import boxPanelGif from "../../assets/videos/boxpanel-low.gif";
     springy(".log-in-btn");
   }
 
-  // Paso 2: al salir de INICIO el glass morphea a ancho total,
-  // y el texto del hero hace slide-out hacia la izquierda.
-  const glassEl = document.querySelector<HTMLElement>(".glass-panel");
-  const textEl = document.querySelector<HTMLElement>(".hero-text-container");
-  window.addEventListener("deckchange", (e) => {
-    const id = (e as CustomEvent).detail?.id;
-    const atHome = id === "inicio";
-    // ancho: más lento y con ease-in-out suave (smooth); texto: salida un poco más rápida
-    const widthT = { duration: 0.95, ease: [0.76, 0, 0.24, 1] as [number, number, number, number] };
-    const textT = { duration: 0.5, ease: [0.22, 1, 0.36, 1] as [number, number, number, number] };
-    const w = atHome ? "50%" : "100%";
-    if (glassEl) animate(glassEl, { width: w }, widthT);
-    if (textEl) animate(textEl, { x: atHome ? 0 : -140, opacity: atHome ? 1 : 0 }, textT);
-  });
+  // Animación por línea del hero (cada línea con su propio delay, en CSS).
+  // Es de UNA SOLA VÍA: entra una vez y queda fija — no anima la salida.
+  const heroWrap = document.querySelector<HTMLElement>(".hero-text-wrap");
+  requestAnimationFrame(() => heroWrap?.classList.add("hero-in"));
+
+  // Parallax: la imagen se mueve más lento que la página al salir el hero, y el
+  // texto sale más rápido → sensación de capas (sin snap duro ya se lee bien).
+  const heroEl = document.querySelector<HTMLElement>(".hero");
+  const sceneImg = document.querySelector<HTMLElement>(".hero-scene-img");
+  const heroScene = document.querySelector<HTMLElement>(".hero-scene");
+  if (heroEl && sceneImg && !reduce) {
+    scroll(animate(sceneImg, { y: [0, 230] }, { ease: "linear" }), {
+      target: heroEl,
+      offset: ["start start", "end start"],
+    });
+    // la escena se apaga un poco al salir: limpia el pase a la sección siguiente
+    if (heroScene) {
+      scroll(animate(heroScene, { opacity: [1, 0.45] }, { ease: "linear" }), {
+        target: heroEl,
+        offset: ["center start", "end start"],
+      });
+    }
+    // el texto se adelanta (capa más cercana)
+    if (heroWrap) {
+      scroll(animate(heroWrap, { y: [0, -70] }, { ease: "linear" }), {
+        target: heroEl,
+        offset: ["start start", "end start"],
+      });
+    }
+  }
 </script>
 
 <section class="hero">
   <div class="hero-stage">
-    <!-- Cubo por detrás -->
-    <div class="cube-layer">
-      <div class="cube-scrub">
-        <img id="hero-gif" src={boxPanelGif.src} alt="box gif" class="cube-img" style="display: none;" />
-        <video id="hero-video" autoplay muted loop playsinline class="cube-img" style="display: none;">
-          <source src={boxPanel} type="video/webm" />
-        </video>
-      </div>
+    <!-- Escena del hero (imagen; luego será video) -->
+    <div class="hero-scene">
+      <img src={heroScene.src} alt="" class="hero-scene-img" />
     </div>
 
-    <!-- Panel glass: mitad izquierda, el cubo se difumina por detrás -->
-    <div class="glass-panel">
+    <!-- Texto del hero -->
+    <div class="hero-text-wrap">
       <HeroText />
     </div>
   </div>
@@ -90,6 +79,10 @@ import boxPanelGif from "../../assets/videos/boxpanel-low.gif";
     height: 100vh;
     overflow: hidden;
     scroll-snap-align: start;
+    /* El fondo del hero es una imagen clara fija → texto oscuro siempre
+       (independiente del tema), para contraste consistente. */
+    --fg: #1d1119;
+    --fg-muted: rgba(29, 17, 25, 0.66);
   }
 
   .hero-stage {
@@ -97,108 +90,81 @@ import boxPanelGif from "../../assets/videos/boxpanel-low.gif";
     inset: 0;
   }
 
-  /* Cubo detrás, corrido a la derecha para que asome del glass */
-  @keyframes cube-in {
+  @keyframes scene-in {
     from {
       opacity: 0;
-      transform: scale(0.96);
+      transform: scale(1.04);
     }
     to {
       opacity: 1;
       transform: scale(1);
     }
   }
-  @keyframes panel-in {
-    from {
-      opacity: 0;
-      transform: translateX(-24px);
-    }
-    to {
-      opacity: 1;
-      transform: translateX(0);
-    }
-  }
-  .cube-layer {
+
+  /* Escena de fondo (imagen / futuro video) */
+  .hero-scene {
     position: absolute;
     inset: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
     z-index: 0;
-    animation: cube-in 0.8s ease-out backwards;
+    overflow: hidden;
+    animation: scene-in 1.1s cubic-bezier(0.22, 1, 0.36, 1) both;
   }
-  .cube-scrub {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    will-change: transform;
-  }
-  .cube-img {
+  /* imagen sobredimensionada: deja "aire" arriba/abajo para el parallax sin huecos */
+  .hero-scene-img {
+    position: absolute;
+    top: -18%;
+    left: 0;
     width: 100%;
-    max-width: 620px;
-    min-width: 300px;
-    height: auto;
-    max-height: 80vh;
-    transform: scale(-1) translateX(-24%);
-    filter: brightness(var(--cube-brightness, 0.95));
+    height: 136%;
+    object-fit: cover;
+    object-position: 70% center;
+    display: block;
   }
 
-  /* Panel glass sobre la mitad izquierda */
-  .glass-panel {
-    position: fixed;
-    top: 0;
-    left: 0;
+  /* scrim: aclara la izquierda para que el texto (oscuro) se lea sobre el piso */
+  .hero-scene::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      90deg,
+      rgba(246, 244, 247, 0.6) 0%,
+      rgba(246, 244, 247, 0.22) 34%,
+      rgba(246, 244, 247, 0) 60%
+    );
+    pointer-events: none;
+  }
+
+  /* Texto del hero: a la izquierda, centrado vertical */
+  .hero-text-wrap {
+    position: relative;
+    z-index: 2;
     height: 100%;
-    width: 50%;
-    z-index: 20;
     display: flex;
     align-items: center;
     padding-left: calc(var(--gutter) + 48px);
-    /* Glass tintado directo: el oscurecimiento va en el propio panel (sin rectángulo aparte) */
-    background:
-      linear-gradient(0deg, var(--panel-backing), var(--panel-backing)),
-      var(--glass-bg);
-    backdrop-filter: blur(24px);
-    -webkit-backdrop-filter: blur(24px);
-    border-right: 1px solid var(--glass-border);
-    will-change: width;
-    animation: panel-in 0.55s cubic-bezier(0.22, 1, 0.36, 1) 0.25s backwards;
+    padding-right: var(--gutter);
   }
 
   /* Fallback simple para pantallas chicas (responsive fino queda para después) */
   @media only screen and (max-width: 1024px) {
     .hero {
-      height: auto;
-      min-height: 90vh;
+      min-height: 92vh;
     }
-    .hero-stage {
-      position: relative;
-      display: flex;
-      flex-direction: column-reverse;
-      align-items: center;
-      gap: 24px;
-      padding: 24px 0 48px;
+    .hero-scene-img {
+      object-position: 62% center;
     }
-    .cube-layer {
-      position: relative;
-      inset: auto;
+    .hero-scene::after {
+      background: linear-gradient(
+        180deg,
+        rgba(246, 244, 247, 0.7) 0%,
+        rgba(246, 244, 247, 0.4) 50%,
+        rgba(246, 244, 247, 0.7) 100%
+      );
     }
-    .cube-img {
-      max-width: 60vw;
-      transform: none;
-    }
-    .glass-panel {
-      position: relative;
-      width: 100%;
-      height: auto;
-      padding-left: 0;
-      justify-content: center;
-      background: none;
-      border: none;
-      backdrop-filter: none;
-      -webkit-backdrop-filter: none;
-      -webkit-mask-image: none;
-      mask-image: none;
+    .hero-text-wrap {
+      padding-left: 24px;
+      padding-right: 24px;
     }
   }
 </style>

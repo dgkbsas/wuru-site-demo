@@ -1,0 +1,266 @@
+---
+// Artifact de Smart Workflows: LIVE STATUS — casos del día con estado de progreso
+// y de paciente. Cada fila:
+//    [hora] [OR]
+//    procedure                    [progress] [patient]
+// Los badges cambian enteros (dot + label) con swap tipo tab.
+const rows = [
+  { t: "08:15", name: "Endoscopy · Paz", dept: "OR 1", active: false,
+    progress: { label: "Done", tone: "green" }, patient: { label: "Discharged", tone: "green" } },
+  { t: "09:00", name: "Hip · Ruiz", dept: "OR 3", active: false,
+    progress: { label: "Delayed", tone: "amber" }, patient: { label: "In OR", tone: "red" } },
+  { t: "10:30", name: "CT chest · Vega", dept: "Rad 1", active: true,
+    progress: { label: "In progress", tone: "red" }, patient: { label: "Pre-op", tone: "blue" } },
+  { t: "11:20", name: "Cataract · Lim", dept: "OR 2", active: true,
+    progress: { label: "In progress", tone: "red" }, patient: { label: "Recovery", tone: "purple" } },
+  { t: "12:00", name: "Infusion · Sáez", dept: "Chair 2", active: false,
+    progress: { label: "Delayed", tone: "amber" }, patient: { label: "Recovery", tone: "purple" } },
+  { t: "13:10", name: "Gallbladder · Díaz", dept: "OR 2", active: false,
+    progress: { label: "Ahead", tone: "blue" }, patient: { label: "Pre-op", tone: "blue" } },
+  { t: "14:40", name: "Arthroscopy · Lim", dept: "OR 1", active: false,
+    progress: { label: "Scheduled", tone: "grey" }, patient: { label: "Waiting", tone: "grey" } },
+];
+---
+
+<div class="board" aria-hidden="true">
+  <div class="art-head">
+    <span class="art-title">LIVE STATUS</span>
+    <span class="art-status"><span class="art-dot"></span>UPDATING</span>
+  </div>
+
+  <!-- títulos de columnas -->
+  <div class="st-cols">
+    <span></span>
+    <span>PROGRESS</span>
+    <span>PATIENT</span>
+  </div>
+
+  <ul class="st-rows">
+    {rows.map((r) => (
+      <li class={`st-row${r.active ? " is-active" : ""}`}>
+        <span class="st-case">
+          <span class="st-top">
+            <span class="st-t">{r.t}</span>
+            <span class="st-dept">{r.dept}</span>
+          </span>
+          <span class="st-name">{r.name}</span>
+        </span>
+        <span class={`pill p-${r.progress.tone}`}>
+          <span class="pl"><span class="pi"><span class="pd"></span>{r.progress.label}</span></span>
+        </span>
+        <span class={`pill p-${r.patient.tone}`}>
+          <span class="pl"><span class="pi"><span class="pd"></span>{r.patient.label}</span></span>
+        </span>
+      </li>
+    ))}
+  </ul>
+</div>
+
+<script>
+  const board = document.querySelector<HTMLElement>(".board");
+  const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  // guard: si el módulo se re-ejecuta (HMR), no arrancamos un segundo loop
+  if (board && !reduce && board.dataset.stInit !== "1") {
+    board.dataset.stInit = "1";
+    const PROG: [string, string][] = [
+      ["In progress", "p-red"],
+      ["Ahead", "p-blue"],
+      ["Delayed", "p-amber"],
+      ["Done", "p-green"],
+      ["Scheduled", "p-grey"],
+    ];
+    const PAT: [string, string][] = [
+      ["Pre-op", "p-blue"],
+      ["In OR", "p-red"],
+      ["Recovery", "p-purple"],
+      ["Discharged", "p-green"],
+      ["Waiting", "p-grey"],
+    ];
+
+    // el badge cambia ENTERO (dot + label) deslizando; el fondo transiciona
+    const setPill = (pill: HTMLElement, v: [string, string]) => {
+      const slot = pill.querySelector<HTMLElement>(".pl");
+      const cur = slot?.firstElementChild as HTMLElement | null;
+      if (!slot || !cur) return;
+      pill.className = "pill " + v[1];
+
+      const next = document.createElement("span");
+      next.className = "pi";
+      next.innerHTML = `<span class="pd"></span>${v[0]}`;
+      slot.appendChild(next);
+
+      // reflow: fija el estado inicial ANTES de transicionar (si no, la transición
+      // no arranca, no dispara transitionend y los nodos se acumulan invisibles)
+      void next.offsetHeight;
+
+      let done = false;
+      const finish = () => {
+        if (done) return;
+        done = true;
+        cur.remove();
+        next.style.transition = "none";
+        next.style.transform = "none";
+      };
+      cur.style.transition = "transform 0.4s cubic-bezier(0.22,1,0.36,1)";
+      next.style.transition = "transform 0.4s cubic-bezier(0.22,1,0.36,1)";
+      cur.style.transform = "translateY(-100%)";
+      next.style.transform = "translateY(-100%)";
+      next.addEventListener("transitionend", finish, { once: true });
+      // red de seguridad: si la transición no corre, limpiamos igual
+      setTimeout(finish, 700);
+    };
+
+    const rowEls = Array.from(board.querySelectorAll<HTMLElement>(".st-row"));
+    rowEls.forEach((row, ri) => {
+      const pills = row.querySelectorAll<HTMLElement>(".pill");
+      if (pills.length < 2) return;
+      let pi = ri % PROG.length;
+      let ti = ri % PAT.length;
+      setInterval(() => {
+        pi = (pi + 1) % PROG.length;
+        setPill(pills[0], PROG[pi]);
+        row.classList.toggle("is-active", PROG[pi][0] === "In progress");
+      }, 2400 + ri * 700);
+      setInterval(() => {
+        ti = (ti + 1) % PAT.length;
+        setPill(pills[1], PAT[ti]);
+      }, 3100 + ri * 500);
+    });
+  }
+</script>
+
+<style>
+  .board {
+    --p-surface: #ffffff;
+    --p-surface-2: #f6f5f8;
+    --p-border: rgba(24, 18, 28, 0.09);
+    --p-ink: #241d2b;
+    --p-muted: #8b8593;
+    --p-label: #a8a2af;
+    --p-shadow: 0 22px 50px -26px rgba(24, 18, 28, 0.45);
+
+    width: 100%;
+    max-width: 720px;
+    margin-inline: auto;
+    box-sizing: border-box;
+    background: var(--p-surface);
+    border: 1px solid var(--p-border);
+    border-radius: 20px;
+    /* padding-left extra: libera el contenido del solape de la card de adelante */
+    padding: 17px 18px 17px 44px;
+    box-shadow: var(--p-shadow);
+    display: flex;
+    flex-direction: column;
+    font-family: "Inter", ui-sans-serif, system-ui, -apple-system, sans-serif;
+  }
+
+  /* misma grilla para títulos de columna y filas */
+  .st-cols,
+  .st-row {
+    display: grid;
+    grid-template-columns: 1fr 104px 104px;
+    align-items: center;
+    gap: 8px;
+  }
+  .st-cols {
+    padding: 0 9px 7px;
+    border-bottom: 1px solid var(--p-border);
+    margin-bottom: 4px;
+  }
+  .st-cols span {
+    font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+    font-size: 9px;
+    letter-spacing: 0.9px;
+    color: var(--p-label);
+  }
+
+  .st-rows { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 2px; }
+  .st-row {
+    padding: 6px 9px;
+    border-radius: 10px;
+    border: 1px solid transparent;
+    transition: background 0.35s ease, border-color 0.35s ease;
+  }
+  .st-row.is-active {
+    background: color-mix(in srgb, #e0563d 6%, transparent);
+    border-color: color-mix(in srgb, #e0563d 16%, transparent);
+    box-shadow: inset 3px 0 0 #e0563d;
+  }
+
+  /* [hora][OR] arriba, procedure abajo */
+  .st-case { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+  .st-top { display: flex; align-items: center; gap: 7px; }
+  .st-t {
+    font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+    font-size: 10px;
+    letter-spacing: 0.2px;
+    color: var(--p-label);
+    font-variant-numeric: tabular-nums;
+  }
+  .st-dept {
+    font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+    color: var(--p-muted);
+    background: var(--p-surface-2);
+    border: 1px solid var(--p-border);
+    border-radius: 4px;
+    padding: 1px 5px;
+  }
+  .st-name {
+    font-size: 12.5px;
+    color: var(--p-ink);
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* pills */
+  .pill {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 9px;
+    border-radius: 100px;
+    font-size: 10.5px;
+    font-weight: 500;
+    border: 1px solid transparent;
+    justify-self: start;
+    transition: background 0.4s ease, color 0.4s ease, border-color 0.4s ease;
+  }
+  .p-amber  { background: #fdf3e2; color: #c2842b; border-color: #f2ddb8; }
+  .p-red    { background: #fdeae5; color: #cf4f38; border-color: #f6cabe; }
+  .p-blue   { background: #e9f1fb; color: #4478bf; border-color: #cfe0f5; }
+  .p-purple { background: #efeafb; color: #765fc0; border-color: #ddd2f4; }
+  .p-green  { background: #e9f9f0; color: #23924f; border-color: #c3ecd4; }
+  .p-grey   { background: #f4f3f6; color: #8b8593; border-color: rgba(24, 18, 28, 0.08); }
+
+  @media only screen and (max-width: 1024px) {
+    .board { padding: 16px; }
+    .st-cols, .st-row { grid-template-columns: 1fr auto; }
+    .st-cols span:nth-child(3), .st-row .pill:last-child { display: none; }
+  }
+</style>
+
+<!-- el swap del badge lo crea el JS → estilos globales bajo .board -->
+<style is:global>
+  /* slot que recorta para el swap tipo tab */
+  .board .pill .pl { display: block; overflow: hidden; height: 1.35em; line-height: 1.35; }
+  .board .pill .pi {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    height: 1.35em;
+    line-height: 1.35;
+    white-space: nowrap;
+  }
+  .board .pill .pd { width: 5px; height: 5px; border-radius: 50%; flex-shrink: 0; }
+  /* el dot toma el color del tono actual del pill */
+  .board .p-amber .pd { background: #e5a13a; }
+  .board .p-red .pd { background: #e0563d; }
+  .board .p-blue .pd { background: #5b8fd0; }
+  .board .p-purple .pd { background: #8a6fd0; }
+  .board .p-green .pd { background: #37b26a; }
+  .board .p-grey .pd { background: #a8a2af; }
+</style>

@@ -1,25 +1,31 @@
 ---
 // Indicador de progreso vertical (derecha): línea fina + thumb accent que se
 // desliza a la sección activa, con el label de la activa al lado. Sin dots.
+// PLATFORM tiene 3 sub-pasos (los ejes del bloque pineado)
 const sections = [
-  { id: "inicio", label: "HOME" },
-  { id: "wuru", label: "WÚRU" },
-  { id: "plataforma", label: "PLATFORM" },
-  { id: "smart-workflows", label: "SMART WORKFLOWS" },
-  { id: "embedded-agents", label: "EMBEDDED AGENTS" },
-  { id: "standalone-agents", label: "STANDALONE AGENTS" },
+  { id: "inicio", label: "HOME", group: "" },
+  { id: "wuru", label: "WÚRU", group: "" },
+  { id: "ax-0", label: "SMART WORKFLOWS", group: "PLATFORM" },
+  { id: "ax-1", label: "EMBEDDED AGENT", group: "PLATFORM" },
+  { id: "ax-2", label: "STANDALONE AGENT", group: "PLATFORM" },
+  { id: "solutions", label: "SOLUTIONS", group: "" },
+  { id: "security", label: "SECURITY", group: "" },
+  { id: "how-we-build", label: "HOW WE BUILD", group: "" },
 ];
 ---
 
 <nav class="section-nav" aria-label="Sections">
-  <span class="sn-current" aria-hidden="true"></span>
+  <span class="sn-current" aria-hidden="true">
+    <span class="sn-group"></span>
+    <span class="sn-label"></span>
+  </span>
   <span class="sn-track"></span>
   <span class="sn-thumb"></span>
   <ul class="sn-hits">
     {
       sections.map((s) => (
         <li>
-          <button type="button" data-target={s.id} aria-label={s.label} />
+          <button type="button" data-target={s.id} data-group={s.group} aria-label={s.label} />
         </li>
       ))
     }
@@ -31,8 +37,14 @@ const sections = [
   const track = nav?.querySelector<HTMLElement>(".sn-track");
   const thumb = nav?.querySelector<HTMLElement>(".sn-thumb");
   const current = nav?.querySelector<HTMLElement>(".sn-current");
+  const groupEl = nav?.querySelector<HTMLElement>(".sn-group");
+  const labelEl = nav?.querySelector<HTMLElement>(".sn-label");
   const hits = Array.from(nav?.querySelectorAll<HTMLButtonElement>("button[data-target]") ?? []);
-  const sections = hits.map((b) => ({ id: b.dataset.target ?? "", label: b.getAttribute("aria-label") ?? "" }));
+  const sections = hits.map((b) => ({
+    id: b.dataset.target ?? "",
+    label: b.getAttribute("aria-label") ?? "",
+    group: b.dataset.group ?? "",
+  }));
   let idx = 0;
 
   const layout = (animated = true) => {
@@ -49,7 +61,10 @@ const sections = [
     }
     thumb.style.height = `${thumbH}px`;
     thumb.style.transform = `translateY(${y}px)`;
-    current.textContent = sections[idx].label;
+    const s = sections[idx];
+    if (groupEl) groupEl.textContent = s.group;
+    if (labelEl) labelEl.textContent = s.label;
+    current.classList.toggle("has-group", !!s.group);
     const labelY = y + thumbH / 2 - current.offsetHeight / 2;
     current.style.transform = `translateY(${labelY}px)`;
     if (!animated) {
@@ -140,6 +155,10 @@ const sections = [
     position: absolute;
     right: 24px;
     top: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 2px;
     font-size: 11px;
     letter-spacing: 1.2px;
     font-weight: 600;
@@ -150,6 +169,21 @@ const sections = [
     transition: transform 0.55s cubic-bezier(0.22, 1, 0.36, 1);
     /* el ancho lo da el texto, anclado por la derecha */
     left: auto;
+  }
+  /* grupo (PLATFORM) arriba del sub-paso */
+  .sn-group {
+    display: none;
+    font-size: 9px;
+    letter-spacing: 1.6px;
+    font-weight: 600;
+    color: var(--fg-muted);
+  }
+  .sn-current.has-group .sn-group { display: block; }
+  .sn-label { display: block; }
+  /* los sub-pasos se ven más chicos que las secciones */
+  .sn-current.has-group .sn-label {
+    font-size: 10px;
+    letter-spacing: 1px;
   }
 
   /* zonas invisibles clickeables (una por sección) sobre el track */

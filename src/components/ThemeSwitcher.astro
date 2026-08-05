@@ -10,8 +10,15 @@
   <button class="theme-dot t-light" data-theme-value="light" title="Light pink" aria-label="Light pink theme"></button>
   <button class="theme-dot t-lighttr" data-theme-value="light-tr" title="Light" aria-label="Light theme"></button>
   <button class="theme-dot t-blush" data-theme-value="blush" title="Light magenta" aria-label="Light magenta theme"></button>
+  <button class="theme-dot t-pastel" data-theme-value="pastel" title="Pastel white" aria-label="Pastel white theme"></button>
+  <button class="theme-dot t-cream" data-theme-value="cream" title="Pastel cream" aria-label="Pastel cream theme"></button>
+  <button class="theme-dot t-rose" data-theme-value="rose" title="Pastel rose" aria-label="Pastel rose theme"></button>
+  <button class="theme-dot t-dots" data-theme-value="dots" title="Blurred dots" aria-label="Blurred dots theme"></button>
+  <button class="theme-dot t-dots-teal" data-theme-value="dots-teal" title="Blurred dots · teal" aria-label="Blurred dots teal theme"></button>
+  <button class="theme-dot t-dots-many" data-theme-value="dots-many" title="Many dots" aria-label="Many dots theme"></button>
   <span class="sw-divider"></span>
   <span class="glow-levels" role="group" aria-label="Magenta light brightness">
+    <button class="glow-level lvl-off" data-glow-value="off" title="Light off" aria-label="Light off"></button>
     <button class="glow-level lvl1" data-glow-value="1" title="Soft light" aria-label="Soft light"></button>
     <button class="glow-level lvl2" data-glow-value="2" title="Medium light" aria-label="Medium light"></button>
     <button class="glow-level lvl3" data-glow-value="3" title="Strong light" aria-label="Strong light"></button>
@@ -46,28 +53,31 @@
 
   sync();
 
-  // Luz magenta ambiental — 3 niveles de brillo (click en el activo apaga)
+  // Luz magenta ambiental — OFF + 3 niveles de brillo
   const glowLevels = Array.from(document.querySelectorAll<HTMLButtonElement>(".glow-level"));
   const savedGlow = localStorage.getItem("wuru-glow");
   if (savedGlow === "1" || savedGlow === "2" || savedGlow === "3") root.dataset.glow = savedGlow;
+  else if (savedGlow === "off") delete root.dataset.glow;
   const syncGlow = () => {
-    const cur = root.dataset.glow || "";
+    const cur = root.dataset.glow || "off";
     glowLevels.forEach((b) => b.classList.toggle("active", b.dataset.glowValue === cur));
   };
   glowLevels.forEach((btn) => {
     btn.addEventListener("click", () => {
       const val = btn.dataset.glowValue;
       if (!val) return;
-      const isOff = root.dataset.glow === val;
-      if (isOff) delete root.dataset.glow;
+      if (val === "off") delete root.dataset.glow;
       else root.dataset.glow = val;
       try {
-        localStorage.setItem("wuru-glow", isOff ? "off" : val);
+        localStorage.setItem("wuru-glow", val);
       } catch (e) {}
       syncGlow();
     });
   });
   syncGlow();
+
+  // Los dots del fondo no dependen del scroll: derivan solos, en loop
+  // (el movimiento vive en CSS — ver .page-dots en globals.scss).
 </script>
 
 <style>
@@ -125,6 +135,29 @@
   .t-blush {
     background: radial-gradient(circle at 32% 78%, #c62a5a, #ede9ed 78%);
   }
+  .t-pastel {
+    background: linear-gradient(135deg, #fdfcff, #f2ecf4);
+  }
+  .t-cream {
+    background: linear-gradient(135deg, #fffdf6, #f2dfb8);
+  }
+  .t-rose {
+    background: linear-gradient(135deg, #fffafc, #f4cdd9);
+  }
+  .t-dots {
+    background: radial-gradient(circle at 30% 30%, #c62a5a 22%, transparent 26%),
+      radial-gradient(circle at 70% 66%, #8246be 20%, transparent 24%), #ece7ee;
+  }
+  .t-dots-teal {
+    background: radial-gradient(circle at 30% 32%, #1f8f78 22%, transparent 26%),
+      radial-gradient(circle at 70% 66%, #46aac8 20%, transparent 24%), #e6efec;
+  }
+  .t-dots-many {
+    background: radial-gradient(circle at 26% 26%, #7b4ad8 17%, transparent 21%),
+      radial-gradient(circle at 70% 34%, #d6468c 15%, transparent 19%),
+      radial-gradient(circle at 34% 72%, #50aadc 15%, transparent 19%),
+      radial-gradient(circle at 74% 74%, #7b4ad8 13%, transparent 17%), #ece8ef;
+  }
   .sw-divider {
     width: 1px;
     height: 16px;
@@ -147,6 +180,31 @@
       transform 0.15s ease,
       box-shadow 0.2s ease,
       background 0.2s ease;
+  }
+  /* apagado: círculo vacío con una barra diagonal */
+  .glow-level.lvl-off {
+    background: transparent;
+    border-color: rgba(127, 127, 127, 0.55);
+    position: relative;
+    overflow: hidden;
+  }
+  .glow-level.lvl-off::after {
+    content: "";
+    position: absolute;
+    left: -2px;
+    right: -2px;
+    top: 50%;
+    height: 1px;
+    background: rgba(127, 127, 127, 0.7);
+    transform: rotate(-45deg);
+  }
+  .glow-level.lvl-off.active {
+    background: transparent;
+    border-color: var(--fg, #888);
+    box-shadow: 0 0 0 2px rgba(127, 127, 127, 0.4);
+  }
+  .glow-level.lvl-off.active::after {
+    background: var(--fg, #888);
   }
   .glow-level.lvl1 {
     background: rgba(214, 40, 120, 0.2);

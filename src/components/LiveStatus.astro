@@ -1,0 +1,132 @@
+---
+// Badge "WÚRU OS · LIVE": pill compacta con dot verde pulsando + una fila de dots
+// (sin nombres) que se van cumpliendo uno a uno. Se adapta al tema (usa --fg).
+const STEPS = 6;
+---
+
+<div class="live-status" aria-hidden="true">
+  <span class="ls-live">
+    <span class="ls-dot"></span>
+    WÚRU OS · LIVE
+  </span>
+  <span class="ls-sep"></span>
+  <ul class="ls-steps">
+    {Array.from({ length: STEPS }).map(() => <li class="ls-step" />)}
+  </ul>
+</div>
+
+<script>
+  const root = document.querySelector<HTMLElement>(".live-status");
+  // guard: si el módulo se re-ejecuta (HMR), no arrancamos un segundo loop
+  if (root && root.dataset.lsInit !== "1") {
+    root.dataset.lsInit = "1";
+    const stepEls = Array.from(root.querySelectorAll<HTMLElement>(".ls-step"));
+    const total = stepEls.length;
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    const render = (i: number) => {
+      stepEls.forEach((el, idx) => {
+        el.classList.toggle("done", idx < i);
+        el.classList.toggle("active", idx === i);
+      });
+    };
+
+    if (reduce) {
+      render(total);
+    } else {
+      let i = 0;
+      render(0);
+      setInterval(() => {
+        i = i > total ? 0 : i + 1;
+        render(i);
+      }, 1100);
+    }
+  }
+</script>
+
+<style>
+  .live-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 14px;
+    padding: 8px 16px;
+    border-radius: 100px;
+    background: color-mix(in srgb, var(--fg) 7%, transparent);
+    border: 1px solid color-mix(in srgb, var(--fg) 16%, transparent);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
+  }
+  .ls-live {
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    font-size: 12.5px;
+    letter-spacing: 1.4px;
+    color: var(--fg);
+    white-space: nowrap;
+  }
+  .ls-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #37d67a;
+    flex-shrink: 0;
+    box-shadow: 0 0 6px rgba(55, 214, 122, 0.7);
+    animation: ls-pulse 1.8s ease-out infinite;
+  }
+  @keyframes ls-pulse {
+    0% {
+      box-shadow: 0 0 0 0 rgba(55, 214, 122, 0.55);
+    }
+    70%,
+    100% {
+      box-shadow: 0 0 0 7px transparent;
+    }
+  }
+  .ls-sep {
+    width: 1px;
+    height: 16px;
+    background: color-mix(in srgb, var(--fg) 18%, transparent);
+    flex-shrink: 0;
+  }
+  .ls-steps {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+  }
+  /* cada step: un dot chico, sin nombre */
+  .ls-step {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    border: 1.5px solid color-mix(in srgb, var(--fg) 30%, transparent);
+    background: transparent;
+    transition: all 0.35s ease;
+  }
+  .ls-step.done {
+    border-color: #37d67a;
+    background: #37d67a;
+    box-shadow: 0 0 7px rgba(55, 214, 122, 0.45);
+  }
+  .ls-step.active {
+    border-color: #f0a03d;
+    box-shadow: 0 0 8px rgba(240, 160, 61, 0.55);
+    animation: ls-blink 1s steps(1) infinite;
+  }
+  @keyframes ls-blink {
+    50% {
+      opacity: 0.35;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .ls-dot,
+    .ls-step.active {
+      animation: none;
+    }
+  }
+</style>
