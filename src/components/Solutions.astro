@@ -1,7 +1,7 @@
 ---
 // Sección Solutions: las ÁREAS de Wúru — el otro eje de la matriz. Cada card
 // linkea a la página de esa solución y muestra qué ejes participan.
-import { solutions } from "../data/solutions";
+import { solutions, AXIS_LABELS } from "../data/solutions";
 ---
 
 <div class="sols">
@@ -13,11 +13,13 @@ import { solutions } from "../data/solutions";
         </span>
         <span class="sol-sum">{s.summary}</span>
         <span class="sol-axes">
-          {(["workflow", "embedded", "standalone"] as const).map((k) => (
-            <span class={`sol-ax ax-${s.axes[k]}`}>
-              <span class="ax-mark"></span>{k}
-            </span>
-          ))}
+          {(["workflow", "embedded", "standalone"] as const)
+            .filter((k) => s.axes[k] !== "none")
+            .map((k) => (
+              <span class={`sol-ax ax-${s.axes[k]}`}>
+                <span class="ax-mark"></span>{AXIS_LABELS[k]}
+              </span>
+            ))}
         </span>
       </div>
     ))
@@ -68,7 +70,7 @@ import { solutions } from "../data/solutions";
   .sol-axes {
     display: flex;
     flex-wrap: wrap;
-    gap: 12px;
+    gap: 10px;
     padding-top: 12px;
     border-top: 1px solid color-mix(in srgb, var(--fg) 10%, transparent);
   }
@@ -77,8 +79,8 @@ import { solutions } from "../data/solutions";
     align-items: center;
     gap: 6px;
     font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
-    font-size: 10px;
-    letter-spacing: 0.4px;
+    font-size: 9.5px;
+    letter-spacing: 0.3px;
     color: var(--fg-muted);
   }
   .ax-mark {

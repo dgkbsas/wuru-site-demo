@@ -1,5 +1,6 @@
 // Las áreas de Wúru (el "otro eje" de la matriz: áreas × ejes).
-// Se usan en la sección Solutions de la home y en la página de cada solución.
+// Cada solución vive en UNA de las tres capas — no en varias.
+// Textos y asignación de capa tomados del overview de producto de Wúru.
 export type AxisUse = "core" | "light" | "none";
 
 export interface Solution {
@@ -7,50 +8,65 @@ export interface Solution {
   name: string;
   summary: string;
   detail: string;
-  /** qué ejes participan en esta área: workflow · embedded · standalone */
+  /** en qué capa vive esta solución: workflow · embedded · standalone */
   axes: { workflow: AxisUse; embedded: AxisUse; standalone: AxisUse };
 }
+
+const WORKFLOW: Solution["axes"] = { workflow: "core", embedded: "none", standalone: "none" };
+const STANDALONE: Solution["axes"] = { workflow: "none", embedded: "none", standalone: "core" };
+// Surgery es la única que usa las tres capas: el workflow de programación, la
+// IA dentro del flujo (Agenda Mágica) y el asistente por WhatsApp.
+const ALL: Solution["axes"] = { workflow: "core", embedded: "core", standalone: "core" };
 
 export const solutions: Solution[] = [
   {
     slug: "surgery",
     name: "Surgery",
-    summary: "The surgical day, end to end — scheduling, pre-op, turnover and notes.",
+    summary:
+      "Surgical scheduling, real-time coordination and booking over WhatsApp.",
     detail:
-      "Wúru runs the operating room as one flow: it schedules cases against real capacity, verifies pre-op requirements, watches turnover in real time and drafts the operative documentation that follows.",
-    axes: { workflow: "core", embedded: "core", standalone: "light" },
+      "Scheduling an operating room means coordinating people: surgeons, anesthesiologists, scrub nurses, admissions and patients. Wúru QX orchestrates that team across four moments — request, planning, confirmation and execution — and in each one the AI does the repetitive work.",
+    axes: ALL,
   },
   {
     slug: "infusion",
-    name: "Infusion",
-    summary: "Chair planning, protocol timing and reconstitutables that hold up.",
+    name: "Infusion Chairs",
+    summary: "Full treatment cycles scheduled in one step, from order to discharge.",
     detail:
-      "Infusion capacity is planned by chair, nurse and protocol at once — with the timing of reconstitutable drugs, premedication and oncologic requirements built into the flow.",
-    axes: { workflow: "core", embedded: "light", standalone: "core" },
+      "Infusion centers run on spreadsheets, scattered rules and manual back-and-forth between pharmacy, nursing, audit and scheduling. The result: rooms that feel saturated while actually running at 50–60% occupancy. Wúru digitizes the process end to end, from the medical order to discharge.",
+    axes: WORKFLOW,
+  },
+  {
+    slug: "quoting",
+    name: "Surgical Quoting",
+    summary: "Quotes built from real comparable episodes, with full traceability.",
+    detail:
+      "A surgical quote is built by hand today and depends on each person's know-how: different criteria, forgotten items and margins nobody can explain afterwards. Wúru builds the quote from real comparable episodes — same surgeries, same surgeons, same supplies — and keeps a trace of every decision.",
+    axes: WORKFLOW,
   },
   {
     slug: "radiology",
     name: "Radiology",
-    summary: "Study scheduling, reading worklists and prior-study matching.",
+    summary: "Structured reports dictated in the reading room.",
     detail:
-      "Studies are scheduled against equipment and technician availability, and the reading room gets worklists with the prior studies already matched to each case.",
-    axes: { workflow: "light", embedded: "core", standalone: "core" },
+      "An agent that sits with the radiologist in the reading room. They dictate as always — the AI transcribes, structures the report on the service's own template and leaves it ready to sign. No new platform, no change in how they work.",
+    axes: STANDALONE,
   },
   {
     slug: "bedside",
-    name: "Bedside",
-    summary: "Rounds, follow-ups and patient status where care happens.",
+    name: "Bedside Notes",
+    summary: "Clinical notes dictated over WhatsApp and posted into the HIS.",
     detail:
-      "Rounds and follow-ups stay structured at the bedside: status changes, pending tasks and clinical notes are captured where the care actually happens, not hours later.",
-    axes: { workflow: "core", embedded: "core", standalone: "core" },
+      "The clinical record competes with the patient: it gets postponed, piles up and is filled in from memory at the end of the shift. This agent solves it through the channel the professional already has in hand — send an audio, get a structured draft, confirm, and the note lands in the institution's HIS.",
+    axes: STANDALONE,
   },
   {
-    slug: "quoting",
-    name: "Quoting",
-    summary: "Procedure pricing and coverage checks, answered in minutes.",
+    slug: "computer-vision",
+    name: "Computer Vision",
+    summary: "Objective operating-room timestamps, with no logging burden.",
     detail:
-      "Quotes are built from the procedure itself — materials, professional fees and coverage rules — so an answer that used to take days is delivered in minutes.",
-    axes: { workflow: "core", embedded: "light", standalone: "core" },
+      "Everything Wúru optimizes depends on one thing: knowing when each thing happened. Today those times are entered by hand, late and with bias. A computer-vision agent on the OR camera detects patient in and patient out and leaves an objective timestamp, without adding a single logging task to the team.",
+    axes: STANDALONE,
   },
 ];
 

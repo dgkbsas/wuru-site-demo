@@ -3,7 +3,7 @@
 ---
 
 <div class="fcta">
-  <h2>Let's change healthcare work.</h2>
+  <h2>Let's <span class="hl">change</span> healthcare work.</h2>
   <p>
     Tell us about your workflows. We'll show you how Wúru's agents run them —
     from intake to last-mile delivery.
@@ -16,25 +16,43 @@
 <style lang="scss">
   .fcta {
     text-align: center;
-    max-width: 720px;
+    max-width: 900px;
     margin-inline: auto;
   }
   h2 {
-    margin: 0 auto 18px;
-    max-width: 16ch;
-    font-size: clamp(32px, 4.6vw, 58px);
+    /* en una sola línea: el título era el que más apilaba el cierre */
+    margin: 0 auto 16px;
+    max-width: none;
+    white-space: nowrap;
+    font-size: clamp(30px, 4.2vw, 54px);
     font-weight: 700;
     line-height: 1.02;
     letter-spacing: -0.03em;
     color: var(--fg);
-    text-wrap: balance;
+  }
+  /* "change" en el color primario */
+  .hl {
+    color: var(--accent);
   }
   p {
-    margin: 0 auto 34px;
-    max-width: 46ch;
+    margin: 0 auto 28px;
+    /* balance reparte las líneas en vez de dejar una larga y una corta */
+    max-width: 58ch;
+    text-wrap: balance;
     font-size: clamp(15px, 1.4vw, 18px);
-    line-height: 1.6;
+    line-height: 1.62;
     color: var(--fg-muted);
+  }
+
+  @media only screen and (max-width: 1024px) {
+    h2 {
+      white-space: normal;
+      max-width: 18ch;
+      text-wrap: balance;
+    }
+    p {
+      max-width: 46ch;
+    }
   }
   .fcta-btn {
     display: inline-flex;

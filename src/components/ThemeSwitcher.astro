@@ -223,4 +223,30 @@
     border-color: #ff3ea0;
     box-shadow: 0 0 8px rgba(214, 40, 120, 0.85);
   }
+
+  /* En pantallas chicas: 13 swatches + la luz no entran en una fila (generaban
+     scroll horizontal) y se superponían con el logo del header. Baja al pie,
+     envuelve en dos filas y se achica. */
+  @media only screen and (max-width: 1024px) {
+    .theme-switcher {
+      top: auto;
+      bottom: 12px;
+      max-width: calc(100vw - 24px);
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 8px;
+      padding: 7px 10px;
+    }
+    .theme-dot {
+      width: 14px;
+      height: 14px;
+    }
+    .glow-level {
+      width: 11px;
+      height: 11px;
+    }
+    .sw-divider {
+      height: 14px;
+    }
+  }
 </style>

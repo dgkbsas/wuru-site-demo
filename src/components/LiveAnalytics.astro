@@ -153,6 +153,12 @@ const kpis = [
     font-variant-numeric: tabular-nums;
   }
   .an-unit { font-size: 15px; font-weight: 600; color: var(--p-muted); margin-left: 2px; }
+
+  /* sin solape en mobile: no hace falta el padding extra de la izquierda */
+  @media only screen and (max-width: 1024px) {
+    .analytics { width: 100%; max-width: 100%; padding: 17px 20px 20px; }
+    .an-kpis { gap: 14px; }
+  }
 </style>
 
 <!-- los dígitos nuevos los crea el JS → estilos globales bajo .analytics -->

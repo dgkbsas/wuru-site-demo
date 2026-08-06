@@ -9,39 +9,45 @@ import HA from "../assets/images/HA-logo.png";
 import SMG from "../assets/images/SMG-logo.png";
 import auna from "../assets/images/auna-logo.png";
 import avidanti from "../assets/images/avidanti-logo.png";
-import hang from "../assets/images/hang-logo.png";
+import angeles from "../assets/images/hang-logo.png"; // "hang" = H-Ang → Hospital Angeles
+import ledor from "../assets/images/ledor-logo.png";
 import Boston from "../assets/images/boston-cientific.png";
 import Microsoft from "../assets/images/microsoft.png";
 
+// h: alto propio cuando el logo necesita otra escala para leerse igual
 const logos = [
   { src: auna, alt: "Auna" },
   { src: avidanti, alt: "Avidanti" },
-  { src: hang, alt: "Hang" },
+  { src: angeles, alt: "Hospital Angeles Health System" },
+  { src: ledor, alt: "Ledor Vador", big: true },
   { src: FSFB, alt: "Fundación Santa Fe de Bogotá" },
   { src: CUN, alt: "Clínica Universidad de Navarra" },
   { src: SMG, alt: "Swiss Medical Group" },
-  { src: CAA, alt: "CAA" },
-  { src: CHSF, alt: "CHSF" },
-  { src: GG, alt: "GG" },
-  { src: HA, alt: "HA" },
+  { src: CAA, alt: "Clínica Anglo Americana" },
+  { src: CHSF, alt: "Clínica Hospital San Fernando" },
+  { src: GG, alt: "Grupo Gamma" },
+  { src: HA, alt: "Hospital Alemán" },
 ];
 ---
 
 <div class="clients">
-  <span class="clients-label">Trusted by leading healthcare institutions</span>
+  <!-- el label lleva el claim: no "nos conocen" sino "está operando" -->
+  <span class="clients-label is-claim">
+    Running in real operating rooms and infusion centers across Latin America
+  </span>
   <div class="clients-marquee">
     <ul class="marquee-track">
       {
         logos.map((l) => (
           <li>
-            <Image src={l.src} alt={l.alt} height={38} class="client-logo" loading="lazy" />
+            <Image src={l.src} alt={l.alt} height={44} class:list={["client-logo", { "is-big": l.big }]} loading="lazy" />
           </li>
         ))
       }
       {
         logos.map((l) => (
           <li aria-hidden="true">
-            <Image src={l.src} alt="" height={38} class="client-logo" loading="lazy" />
+            <Image src={l.src} alt="" height={44} class:list={["client-logo", { "is-big": l.big }]} loading="lazy" />
           </li>
         ))
       }
@@ -51,14 +57,28 @@ const logos = [
     <span class="clients-label">In partnership with</span>
     <ul class="clients-row partners-row">
       <li><Image src={Boston} alt="Boston Scientific" height={40} class="partner-logo" loading="lazy" /></li>
-      <li><Image src={Microsoft} alt="Microsoft Partner" height={30} class="partner-logo" loading="lazy" /></li>
+      <li><Image src={Microsoft} alt="Microsoft Partner" height={30} class="partner-logo is-small" loading="lazy" /></li>
+      <li><Image src={HA} alt="Hospital Alemán" height={40} class="partner-logo" loading="lazy" /></li>
+      <li><Image src={GG} alt="Grupo Gamma" height={44} class="partner-logo" loading="lazy" /></li>
+      <li><Image src={angeles} alt="Hospital Angeles Health System" height={38} class="partner-logo is-mid" loading="lazy" /></li>
     </ul>
   </div>
 </div>
 
 <style>
   .clients {
-    margin-top: 44px;
+    margin-top: 30px;
+  }
+  /* el label que afirma la operación real: sin mayúsculas, un punto más grande */
+  .clients-label.is-claim {
+    max-width: 56ch;
+    margin-inline: auto;
+    text-transform: none;
+    letter-spacing: 0;
+    font-size: 14.5px;
+    line-height: 1.5;
+    text-wrap: balance;
+    opacity: 1;
   }
   .clients-label {
     display: block;
@@ -70,8 +90,9 @@ const logos = [
   }
   /* banner marquee de clients: logos deslizan y se desvanecen en los bordes */
   .clients-marquee {
-    margin-top: 18px;
-    max-width: 640px;
+    margin-top: 14px;
+    width: 100%;
+    max-width: 920px;
     overflow: hidden;
     -webkit-mask-image: linear-gradient(to right, transparent 0, #000 9%, #000 91%, transparent 100%);
     mask-image: linear-gradient(to right, transparent 0, #000 9%, #000 91%, transparent 100%);
@@ -127,8 +148,12 @@ const logos = [
   .client-logo:hover {
     opacity: 0.9;
   }
+  /* logos que necesitan más escala para leerse igual que el resto */
+  .client-logo.is-big {
+    height: 54px;
+  }
   .partners {
-    margin-top: 36px;
+    margin-top: clamp(24px, 3.2vh, 36px);
   }
   .partners-row {
     margin-top: 14px;
@@ -144,6 +169,15 @@ const logos = [
   .partner-logo:hover {
     opacity: 0.92;
   }
+  .partner-logo.is-big {
+    height: 64px;
+  }
+  .partner-logo.is-small {
+    height: 30px;
+  }
+  .partner-logo.is-mid {
+    height: 38px;
+  }
 
   @media only screen and (max-width: 1024px) {
     .clients-row {
@@ -151,6 +185,18 @@ const logos = [
     }
     .client-logo {
       height: 26px;
+    }
+    .client-logo.is-big {
+      height: 40px;
+    }
+    .partner-logo.is-big {
+      height: 52px;
+    }
+    .partner-logo.is-small {
+      height: 24px;
+    }
+    .partner-logo.is-mid {
+      height: 32px;
     }
     .marquee-track li {
       margin-right: 40px;

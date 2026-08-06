@@ -148,6 +148,20 @@
     flex-direction: column;
   }
 
+  /* en pantallas chicas deja de ser una solapa metida detrás del mobile:
+     pasa a card completa (sin margen negativo ni esquinas asimétricas) */
+  @media only screen and (max-width: 1024px) {
+    .scan-panel {
+      width: 100%;
+      flex: 0 1 auto;
+      margin-left: 0;
+      border-left: 1px solid var(--p-border);
+      border-radius: 20px;
+      padding: 17px 18px;
+      box-shadow: 0 22px 50px -26px rgba(24, 18, 28, 0.45);
+    }
+  }
+
   /* lista: alto reservado y anclada abajo → todo se apila desde abajo */
   .sc-list {
     list-style: none;

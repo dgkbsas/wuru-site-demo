@@ -417,6 +417,15 @@ const {
       padding-left: 24px;
       padding-right: 24px;
     }
+    /* sin pin ni dwell en mobile: el statement no debe comerse 2 pantallas */
+    .has-dwell { height: auto; min-height: 100vh; }
+    .has-dwell .ds-stage { position: static; height: auto; min-height: 100vh; }
+    /* sin monte negativo: en flujo normal genera superposición de contenido */
+    .has-panel { margin-top: 0; box-shadow: none; }
+    /* el statement centrado envuelve (nowrap cortaba "INTELLIGENCE LAYER") */
+    .is-center .ds-title :global(.t-hero) { white-space: normal; }
+    .is-center .ds-title { font-size: clamp(34px, 9vw, 64px); }
+
     /* en pantallas chicas el split se apila */
     .is-split .ds-inner {
       grid-template-columns: 1fr;

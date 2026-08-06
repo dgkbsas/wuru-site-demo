@@ -65,12 +65,14 @@
     animation: animate-letter 0.2s ease-out;
   }
   .text-container {
-    font-size: 80px;
+    /* fluido: en pantallas chicas la palabra más larga ("LIMITLESS") entraba
+       cortada con el tamaño fijo de 80px */
+    font-size: clamp(36px, 10.5vw, 80px);
     overflow: hidden;
   }
 
   #animated-text {
-    height: 100px;
+    height: 1.25em;
     color: var(--fg);
     font-weight: 900;
     letter-spacing: 1px;

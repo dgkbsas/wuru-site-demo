@@ -36,6 +36,7 @@ const axes = [
       <!-- paneles (cambian por eje) -->
       <div class="pp-panels">
         <div class="pp-panel is-on" data-axis="0">
+          <span class="pp-axis-name">{axes[0].name}</span>
           <div class="pp-art">
             <div class="wf-stack">
               <div class="wf-c wf-c1"><CalendarCard /></div>
@@ -46,10 +47,12 @@ const axes = [
           <p class="pp-exp">{axes[0].exp}</p>
         </div>
         <div class="pp-panel" data-axis="1">
+          <span class="pp-axis-name">{axes[1].name}</span>
           <div class="pp-art"><AgentPanel /></div>
           <p class="pp-exp">{axes[1].exp}</p>
         </div>
         <div class="pp-panel" data-axis="2">
+          <span class="pp-axis-name">{axes[2].name}</span>
           <div class="pp-art">
             <div class="sa-stack">
               <ChatPanel />
@@ -331,6 +334,9 @@ const axes = [
   }
   /* los artifacts son UI: no heredan el centrado del statement */
   .pp-art { width: 100%; display: flex; justify-content: center; text-align: left; }
+
+  /* el nombre del eje sólo se muestra en mobile: en desktop lo dice el switcher */
+  .pp-axis-name { display: none; }
   .pp-exp {
     margin: 0;
     max-width: none;
@@ -376,6 +382,8 @@ const axes = [
       padding: 80px var(--gutter);
     }
     .pp-markers { display: none; }
+    /* 94vw dentro de un stage con padding desbordaba el área útil */
+    .pp-inner { width: 100%; }
     /* en mobile mostramos los 3 ejes apilados (sin pin) */
     .pp-panels { display: flex; flex-direction: column; gap: 60px; margin-top: 40px; }
     .pp-panel {
@@ -388,12 +396,83 @@ const axes = [
     .pp-thesis { white-space: normal; font-size: clamp(26px, 7vw, 40px); }
     .pp-exp { white-space: normal; max-width: 460px; margin-inline: auto; }
     .pp-axes { display: none; }
-    .wf-stack { flex-direction: column; gap: 22px; align-items: center; }
-    .wf-c { height: auto; width: auto; }
-    .wf-c > :global(*) { height: auto; width: auto; overflow: visible; }
+
+    /* cada eje es su propio bloque: título → explicación → artifacts
+       (en desktop la explicación va al pie; acá acompaña al título) */
+    .pp-panel { align-items: flex-start; gap: 10px; }
+    .pp-axis-name {
+      display: block;
+      order: -2;
+      align-self: flex-start;
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--accent);
+    }
+    .pp-exp {
+      order: -1;
+      align-self: flex-start;
+      text-align: left;
+      margin: 0;
+    }
+
+    /* Los artifacts NO se apilan: van uno al lado del otro en una tira que se
+       desliza (scroll-snap), de borde a borde. Cada card ocupa ~82vw, así se ve
+       que hay más a la derecha. */
+    .pp-stage { overflow: visible; }
+    .pp-art {
+      display: block;
+      width: 100vw;
+      margin-left: calc(50% - 50vw);
+      overflow-x: auto;
+      overscroll-behavior-x: contain;
+      scroll-snap-type: x mandatory;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+      /* padding generoso abajo: al ser contenedor de scroll también recorta en
+         vertical, y sin aire la sombra de las cards quedaba cortada en seco */
+      padding: 10px var(--gutter) 48px;
+    }
+    .pp-art::-webkit-scrollbar { display: none; }
+
+    .wf-stack,
+    .sa-stack {
+      flex-direction: row;
+      align-items: stretch;
+      justify-content: flex-start;
+      gap: 14px;
+      width: max-content;
+      height: auto;
+    }
+    /* IMPORTANTE: resetear la opacidad — su estado base es 0 y en mobile no
+       existe el .is-on del eje activo, así que quedaban invisibles. */
+    .wf-c {
+      height: auto;
+      flex: 0 0 82vw;
+      width: 82vw;
+      max-width: 400px;
+      scroll-snap-align: center;
+      opacity: 1;
+      transform: none;
+      transition: none;
+    }
+    .wf-c > :global(*) { height: 100%; width: 100%; max-width: 100%; overflow: visible; }
     .wf-c2, .wf-c3 { margin-left: 0; }
     .wf-c3 :global(.board) { max-width: none; }
-    .sa-stack { flex-direction: column; }
+
+    /* el chat y la solapa del scan también van lado a lado, deslizables.
+       El alto lo fija el contenedor: con height:auto el scan perdía el recorte
+       y crecía con todos los items apilados (queda muy alto). */
+    .sa-stack { height: 400px; }
+    .sa-stack > :global(.chat-panel),
+    .sa-stack > :global(.scan-panel) {
+      flex: 0 0 82vw;
+      width: 82vw;
+      max-width: 400px;
+      height: 100%;
+      scroll-snap-align: center;
+    }
   }
 
   @media (prefers-reduced-motion: reduce) {

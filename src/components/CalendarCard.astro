@@ -247,6 +247,13 @@ const events = [
     transition: top 0.65s linear;
     pointer-events: none;
   }
+  /* fluido en pantallas chicas (420px fijos desbordaban) */
+  @media only screen and (max-width: 1024px) {
+    .cal { width: 100%; max-width: 100%; }
+    /* los eventos se posicionan en % de la grilla: sin alto mínimo colapsaba */
+    .cal-body { min-height: 320px; }
+  }
+
   .cal-now-t {
     position: absolute;
     left: -2px;

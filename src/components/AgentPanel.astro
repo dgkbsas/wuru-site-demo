@@ -253,8 +253,21 @@ const HEX = `<svg viewBox="0 0 24 24" width="13" height="13" aria-hidden="true">
   /* indicador LIVE de video (REC) */
   .cv-rec { color: #d8452c; font-weight: 700; }
 
+  /* en mobile las dos columnas se vuelven una tira horizontal deslizable
+     (el contenedor .pp-art es el que scrollea) */
   @media only screen and (max-width: 1024px) {
-    .agent-panel { grid-template-columns: 1fr; max-width: 420px; }
+    .agent-panel {
+      grid-template-columns: none;
+      grid-auto-flow: column;
+      grid-auto-columns: minmax(0, 82vw);
+      width: max-content;
+      max-width: none;
+      gap: 14px;
+    }
+    .agent-panel > * {
+      max-width: 400px;
+      scroll-snap-align: center;
+    }
   }
   @media (prefers-reduced-motion: reduce) {
     .va-scan, .va-box { animation: none; }

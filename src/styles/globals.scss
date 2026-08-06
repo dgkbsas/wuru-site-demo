@@ -351,6 +351,19 @@
   background: var(--dot-b);
 }
 
+/* El naranja de la marca. NO es --accent: el accent cambia por tema, la marca no.
+   El logotipo WÚRU va siempre en este color. */
+:root {
+  --brand: #ec5a3d;
+}
+
+/* en pantallas chicas el gutter de 48px se comía 1/4 del ancho */
+@media only screen and (max-width: 700px) {
+  :root {
+    --gutter: 20px;
+  }
+}
+
 * {
   box-sizing: border-box;
   text-rendering: geometricPrecision;

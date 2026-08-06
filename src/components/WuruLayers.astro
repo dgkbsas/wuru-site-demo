@@ -114,6 +114,29 @@
     }
   }
 
+  /* Es un grafismo decorativo de 620×560px: en pantallas chicas desbordaba el
+     viewport (hasta +279px) y empujaba el layout. Se achica en tablet y se
+     oculta en mobile, donde no aporta y sí estorba. */
+  @media only screen and (max-width: 1024px) {
+    .wuru-layers {
+      width: 420px;
+      height: 380px;
+      transform: translateX(-30%) translateY(var(--off-y, 40%));
+    }
+    :global(.deck-section.is-active) .wuru-layers {
+      transform: translateX(-30%) translateY(0);
+    }
+    .stack {
+      width: 330px;
+      height: 330px;
+    }
+  }
+  @media only screen and (max-width: 700px) {
+    .wuru-layers {
+      display: none;
+    }
+  }
+
   @media (prefers-reduced-motion: reduce) {
     .layer {
       transform: translateZ(var(--z));
