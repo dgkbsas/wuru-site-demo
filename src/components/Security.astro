@@ -1,26 +1,26 @@
 ---
-// Sección Security & trust: los 4 compromisos de confidencialidad.
-// Copy del sitio actual + el ajuste del Notion ("highest" en vez de "strictest").
+// Sección Security & trust: los 4 compromisos. La gobernanza es sobre los
+// usuarios de la institución (quién accede y qué puede hacer), no sobre los agentes.
 const items = [
   {
-    t: "PHI is never shared with LLMs",
-    d: "Protected health information and personal data are never sent to LLM providers — identifiers are stripped before any model call.",
-    icon: "M12 3l7 3v6c0 4.2-2.9 7.6-7 9-4.1-1.4-7-4.8-7-9V6l7-3z",
-  },
-  {
-    t: "No training on your data",
-    d: "Patient data is never used to train models. Your information stays yours.",
-    icon: "M6 4h9l4 4v12a1 1 0 01-1 1H6a1 1 0 01-1-1V5a1 1 0 011-1zM4 4l16 16",
-  },
-  {
-    t: "Works inside your stack",
-    d: "Integrates with your HIS/EMR and PACS — and runs at the OS layer where direct integration isn't possible.",
-    icon: "M4 6h16M4 12h16M4 18h10M18 15v6M15 18h6",
-  },
-  {
-    t: "Governance by design",
-    d: "Human-in-the-loop controls, audit trails, and role-based access across every workflow.",
+    t: "Governance stays with the institution",
+    d: "Each institution defines what its users can access and do. Control over every action stays on your side.",
     icon: "M12 3l8 4v5c0 4-3.2 7.4-8 9-4.8-1.6-8-5-8-9V7l8-4zM9 12l2 2 4-4",
+  },
+  {
+    t: "Human in the loop by design",
+    d: "The agent proposes, the person approves. Autonomy is earned with use — it is never assumed.",
+    icon: "M12 12a4 4 0 100-8 4 4 0 000 8zM4.5 20.5a7.5 7.5 0 0115 0M16.5 12.5l2 2 3.5-3.5",
+  },
+  {
+    t: "Roles and permissions",
+    d: "Granular down to the level each institution needs, with a complete audit trail of every action.",
+    icon: "M7 3h7l5 5v13a1 1 0 01-1 1H7a1 1 0 01-1-1V4a1 1 0 011-1zM14 3v5h5M9 14l2 2 4-4",
+  },
+  {
+    t: "Integrations built with you",
+    d: "We work closely with each institution on the integrations it needs — faithful to the source, and in both directions.",
+    icon: "M8.5 7.5h-2a5 5 0 000 10h2M15.5 7.5h2a5 5 0 010 10h-2M8 12.5h8",
   },
 ];
 ---

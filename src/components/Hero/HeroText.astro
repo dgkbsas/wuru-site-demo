@@ -9,9 +9,10 @@ import HeroTextChanging from "./HeroTextChanging.astro";
   </span>
   <div class="hl-line" style="--i: 1"><HeroTextChanging /></div>
   <h1 class="hl-line" style="--i: 2">Healthcare work</h1>
-  <h3 class="tagline-1 hl-line" style="--i: 3">The next step for hospital operations</h3>
+  <h3 class="tagline-1 hl-line" style="--i: 3">Moving healthcare operations forward</h3>
   <div class="line hl-line" style="--i: 4"></div>
-  <a class="product-btn hl-line" style="--i: 5" href="mailto:hola@wuru.ai?subject=W%C3%BAru%20Demo" title="Book a demo" rel="noopener noreferrer">BOOK A DEMO</a>
+  <p class="purpose hl-line" style="--i: 5">Quality healthcare, accessible to everyone.</p>
+  <a class="product-btn hl-line" style="--i: 6" href="mailto:hola@wuru.ai?subject=W%C3%BAru%20Demo" title="Book a demo" rel="noopener noreferrer">BOOK A DEMO</a>
 </div>
 
 <style lang="scss">
@@ -130,6 +131,14 @@ import HeroTextChanging from "./HeroTextChanging.astro";
     margin-top: 16px;
     filter: drop-shadow(0 2px 5px rgba(255, 0, 0, 0.8));
   }
+  /* el propósito: después de la línea, en su propia zona — no compite con la
+     tagline (que dice qué hacemos) porque dice para qué */
+  .purpose {
+    margin: 14px 0 0;
+    font-size: 16px;
+    line-height: 1.5;
+    color: var(--fg-muted);
+  }
   .product-btn {
     display: inline-flex;
     align-items: center;
@@ -143,7 +152,7 @@ import HeroTextChanging from "./HeroTextChanging.astro";
     border-radius: 100px;
     letter-spacing: 0.5px;
     cursor: pointer;
-    margin-top: 32px;
+    margin-top: 24px;
     transition:
       opacity 0.5s ease,
       transform 0.2s ease,
