@@ -34,6 +34,14 @@ import HeroText from "./HeroText.astro";
   // Con reduced-motion se pausa: queda el primer frame como imagen fija.
   const heroVideo = document.querySelector<HTMLVideoElement>(".hero-scene-img");
   if (heroVideo) {
+    // se acelera desde el player (no re-encodeando) → cero pérdida de calidad
+    const SPEED = 1.2;
+    const setSpeed = () => (heroVideo.playbackRate = SPEED);
+    setSpeed();
+    // algunos navegadores resetean el rate al recargar la fuente / al loopear
+    heroVideo.addEventListener("loadedmetadata", setSpeed);
+    heroVideo.addEventListener("play", setSpeed);
+
     const reveal = () => heroVideo.setAttribute("data-loaded", "");
     if (heroVideo.readyState >= 2) reveal();
     else heroVideo.addEventListener("loadeddata", reveal, { once: true });
@@ -138,7 +146,7 @@ import HeroText from "./HeroText.astro";
     position: absolute;
     inset: -4%;
     z-index: 0;
-    background: url("data:image/jpeg;base64,/9j//gAQTGF2YzYyLjI4LjEwMQD/2wBDAAgMDA4MDhAQEBAQEBMSExQUFBMTExMUFBQVFRUZGRkVFRUUFBUVGBgZGRscGxoaGRocHB4eHiQkIiIqKiszMz7/xABhAAADAAMBAAAAAAAAAAAAAAADAgQBAAcFAQEBAQAAAAAAAAAAAAAAAAAAAQIQAAIBBAICAwEAAAAAAAAAAAECAAMSEUEhMTJxIvDhUREBAQAAAAAAAAAAAAAAAAAAAAH/wAARCAASACADASIAAhEAAxEA/9oADAMBAAIRAxEAPwDs8zNhFEyyhavRZnpfKoyYvCKWszyLv4ccjc9WmysoI5H3veZAVUVCqVBSdxey2gltXc71KvEYH6ZYoUKO4KFHcIVvMejFMZvMejFMD//Z") center / cover no-repeat;
+    background: url("data:image/jpeg;base64,/9j//gAQTGF2YzYyLjI4LjEwMQD/2wBDAAgMDA4MDhAQEBAQEBMSExQUFBMTExMUFBQVFRUZGRkVFRUUFBUVGBgZGRscGxoaGRocHB4eHiQkIiIqKiszMz7/xABgAAEAAwEBAAAAAAAAAAAAAAAEAwUCAQYBAQEBAAAAAAAAAAAAAAAAAAACARAAAgICAgMBAQEAAAAAAAAAAgEAAxFBEjFRM3JxIWERAQEBAAAAAAAAAAAAAAAAAAABIf/AABEIABIAIAMBIgACEQADEQD/2gAMAwEAAhEDEQA/APTTSU5EAMlARW0kRVYOxjjmqxZcM/1Zx09rcvqCAgRJ5Xn887TlW6xG1jXcqTNcyHiJMtc1neonKrHinn/X235lTChqKDuFUUHcyDB+5fLkZSU/aPy5CU0f/9k=") center / cover no-repeat;
     filter: blur(24px);
     transform: scale(1.04);
   }
@@ -154,9 +162,30 @@ import HeroText from "./HeroText.astro";
     display: block;
     opacity: 0;
     transition: opacity 0.45s ease;
+    /* grading por CSS (no re-encodeado): blanquea los azulejos y aviva el neón,
+       lo que además ayuda al contraste del texto oscuro de la izquierda */
+    filter: contrast(1.24) saturate(1.2) brightness(1.02);
   }
   .hero-scene-img[data-loaded] {
     opacity: 1;
+  }
+  /* velo claro por encima del video: este grade es más oscuro, y el texto del
+     hero es oscuro fijo → asegura contraste sin lavar la escena de la derecha */
+  .hero-scene::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    background:
+      linear-gradient(
+        100deg,
+        rgba(248, 246, 249, 0.72) 0%,
+        rgba(248, 246, 249, 0.5) 24%,
+        rgba(248, 246, 249, 0.16) 48%,
+        transparent 66%
+      ),
+      linear-gradient(180deg, rgba(248, 246, 249, 0.3) 0%, transparent 26%);
   }
 
   /* Texto del hero: a la izquierda, centrado vertical */
@@ -183,17 +212,13 @@ import HeroText from "./HeroText.astro";
       align-items: flex-start;
       padding-top: clamp(88px, 14vh, 130px);
     }
-    /* se aclara sólo la franja de arriba, donde apoya el texto */
+    /* acá el texto va arriba (no a la izquierda): el velo pasa a franja superior */
     .hero-scene::after {
-      content: "";
-      position: absolute;
-      inset: 0;
-      pointer-events: none;
       background: linear-gradient(
         180deg,
         rgba(246, 244, 247, 0.88) 0%,
-        rgba(246, 244, 247, 0.6) 30%,
-        rgba(246, 244, 247, 0.15) 52%,
+        rgba(246, 244, 247, 0.62) 30%,
+        rgba(246, 244, 247, 0.18) 52%,
         transparent 66%
       );
     }
