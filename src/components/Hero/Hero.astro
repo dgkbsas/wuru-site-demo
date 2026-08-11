@@ -1,6 +1,5 @@
 ---
 import HeroText from "./HeroText.astro";
-import heroScene from "../../assets/images/hero-scene.png";
 ---
 
 <script>
@@ -31,6 +30,16 @@ import heroScene from "../../assets/images/hero-scene.png";
   const heroWrap = document.querySelector<HTMLElement>(".hero-text-wrap");
   requestAnimationFrame(() => heroWrap?.classList.add("hero-in"));
 
+  // El video entra con fade sobre el placeholder borroso (nunca hay hueco).
+  // Con reduced-motion se pausa: queda el primer frame como imagen fija.
+  const heroVideo = document.querySelector<HTMLVideoElement>(".hero-scene-img");
+  if (heroVideo) {
+    const reveal = () => heroVideo.setAttribute("data-loaded", "");
+    if (heroVideo.readyState >= 2) reveal();
+    else heroVideo.addEventListener("loadeddata", reveal, { once: true });
+    if (reduce) heroVideo.pause();
+  }
+
   // Parallax: la imagen se mueve más lento que la página al salir el hero, y el
   // texto sale más rápido → sensación de capas (sin snap duro ya se lee bien).
   const heroEl = document.querySelector<HTMLElement>(".hero");
@@ -60,9 +69,22 @@ import heroScene from "../../assets/images/hero-scene.png";
 
 <section class="hero">
   <div class="hero-stage">
-    <!-- Escena del hero (imagen; luego será video) -->
+    <!-- Escena del hero: el loop se sirve TAL CUAL sale de Premiere (sin
+         re-encodear, para no perder calidad). El contenedor lleva un
+         placeholder diminuto (base64, borroso) para que no haya hueco. -->
     <div class="hero-scene">
-      <img src={heroScene.src} alt="" class="hero-scene-img" />
+      <video
+        class="hero-scene-img"
+        poster="/video/hero-poster.webp"
+        preload="metadata"
+        autoplay
+        loop
+        muted
+        playsinline
+        aria-hidden="true"
+      >
+        <source src="/video/hero.mp4" type="video/mp4" />
+      </video>
     </div>
 
     <!-- Texto del hero -->
@@ -109,7 +131,18 @@ import heroScene from "../../assets/images/hero-scene.png";
     overflow: hidden;
     animation: scene-in 1.1s cubic-bezier(0.22, 1, 0.36, 1) both;
   }
-  /* imagen sobredimensionada: deja "aire" arriba/abajo para el parallax sin huecos */
+  /* placeholder de 32px en base64: color y forma desde el primer milisegundo,
+     sin una sola petición de red */
+  .hero-scene::before {
+    content: "";
+    position: absolute;
+    inset: -4%;
+    z-index: 0;
+    background: url("data:image/jpeg;base64,/9j//gAQTGF2YzYyLjI4LjEwMQD/2wBDAAgMDA4MDhAQEBAQEBMSExQUFBMTExMUFBQVFRUZGRkVFRUUFBUVGBgZGRscGxoaGRocHB4eHiQkIiIqKiszMz7/xABhAAADAAMBAAAAAAAAAAAAAAADAgQBAAcFAQEBAQAAAAAAAAAAAAAAAAAAAQIQAAIBBAICAwEAAAAAAAAAAAECAAMSEUEhMTJxIvDhUREBAQAAAAAAAAAAAAAAAAAAAAH/wAARCAASACADASIAAhEAAxEA/9oADAMBAAIRAxEAPwDs8zNhFEyyhavRZnpfKoyYvCKWszyLv4ccjc9WmysoI5H3veZAVUVCqVBSdxey2gltXc71KvEYH6ZYoUKO4KFHcIVvMejFMZvMejFMD//Z") center / cover no-repeat;
+    filter: blur(24px);
+    transform: scale(1.04);
+  }
+  /* video sobredimensionado: deja "aire" arriba/abajo para el parallax sin huecos */
   .hero-scene-img {
     position: absolute;
     top: -18%;
@@ -119,20 +152,11 @@ import heroScene from "../../assets/images/hero-scene.png";
     object-fit: cover;
     object-position: 70% center;
     display: block;
+    opacity: 0;
+    transition: opacity 0.45s ease;
   }
-
-  /* scrim: aclara la izquierda para que el texto (oscuro) se lea sobre el piso */
-  .hero-scene::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(
-      90deg,
-      rgba(246, 244, 247, 0.6) 0%,
-      rgba(246, 244, 247, 0.22) 34%,
-      rgba(246, 244, 247, 0) 60%
-    );
-    pointer-events: none;
+  .hero-scene-img[data-loaded] {
+    opacity: 1;
   }
 
   /* Texto del hero: a la izquierda, centrado vertical */
@@ -154,12 +178,23 @@ import heroScene from "../../assets/images/hero-scene.png";
     .hero-scene-img {
       object-position: 62% center;
     }
+    /* el texto sube: abajo queda visible la acción del video */
+    .hero-text-wrap {
+      align-items: flex-start;
+      padding-top: clamp(88px, 14vh, 130px);
+    }
+    /* se aclara sólo la franja de arriba, donde apoya el texto */
     .hero-scene::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
       background: linear-gradient(
         180deg,
-        rgba(246, 244, 247, 0.7) 0%,
-        rgba(246, 244, 247, 0.4) 50%,
-        rgba(246, 244, 247, 0.7) 100%
+        rgba(246, 244, 247, 0.88) 0%,
+        rgba(246, 244, 247, 0.6) 30%,
+        rgba(246, 244, 247, 0.15) 52%,
+        transparent 66%
       );
     }
     .hero-text-wrap {
