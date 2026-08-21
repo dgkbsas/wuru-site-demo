@@ -1,18 +1,15 @@
 ---
 // Bloque Platform "pineado" (sticky-scroll): el marco (eyebrow + tesis + ejes) queda
-// fijo mientras el scroll cambia el eje activo (Workflow → Embedded → Standalone),
+// fijo mientras el scroll cambia el eje activo (Smart Workflows → Agents),
 // cruzando el artifact + la explicación con animación por parte (in/out).
 import LiveBoard from "./LiveBoard.astro";
 import LiveAnalytics from "./LiveAnalytics.astro";
 import CalendarCard from "./CalendarCard.astro";
 import AgentPanel from "./AgentPanel.astro";
-import ChatPanel from "./ChatPanel.astro";
-import ScanPanel from "./ScanPanel.astro";
 
 const axes = [
   { key: "workflow", name: "Smart Workflows", exp: "One operational source of truth for everything that happens." },
-  { key: "embedded", name: "Embedded agent", exp: "Watches and verifies inside the flow, with a human in the loop." },
-  { key: "standalone", name: "Standalone agent", exp: "Gets whole tasks done, right where people already are." },
+  { key: "agents", name: "Agents", exp: "Delegate whole operations. Supervise, don't execute." },
 ];
 ---
 
@@ -22,8 +19,8 @@ const axes = [
       <!-- marco fijo -->
       <div class="pp-frame">
         <span class="pp-eyebrow">Platform</span>
-        <h2 class="pp-thesis">Systemic solutions over healthcare infrastructure.</h2>
-        <p class="pp-lede">The three combine as one system to strengthen <strong>any healthcare operation</strong>.</p>
+        <h2 class="pp-thesis">Smart workflows hold the operation. Agents run it.</h2>
+        <p class="pp-lede">Together they form one system your teams <strong>delegate to and supervise</strong>.</p>
         <div class="pp-axes">
           {axes.map((a, i) => (
             <button type="button" class={`pp-axis${i === 0 ? " is-on" : ""}`} data-axis={i}>
@@ -51,16 +48,6 @@ const axes = [
           <div class="pp-art"><AgentPanel /></div>
           <p class="pp-exp">{axes[1].exp}</p>
         </div>
-        <div class="pp-panel" data-axis="2">
-          <span class="pp-axis-name">{axes[2].name}</span>
-          <div class="pp-art">
-            <div class="sa-stack">
-              <ChatPanel />
-              <ScanPanel />
-            </div>
-          </div>
-          <p class="pp-exp">{axes[2].exp}</p>
-        </div>
       </div>
     </div>
   </div>
@@ -69,7 +56,6 @@ const axes = [
   <div class="pp-markers" aria-hidden="true">
     <div class="pp-marker" data-axis="0"></div>
     <div class="pp-marker" data-axis="1"></div>
-    <div class="pp-marker" data-axis="2"></div>
   </div>
 </section>
 
@@ -176,22 +162,6 @@ const axes = [
       18px 8px 40px -22px rgba(24, 18, 28, 0.4);
   }
 
-  /* Standalone: el scan sale como solapa desde atrás del "mobile" (chat) */
-  .sa-stack {
-    display: flex;
-    align-items: stretch;
-    justify-content: center;
-    height: 452px;
-  }
-  /* misma altura exacta: la fija el contenedor */
-  .sa-stack > :global(.chat-panel),
-  .sa-stack > :global(.scan-panel) {
-    position: relative;
-    height: 100%;
-    box-sizing: border-box;
-  }
-  .sa-stack > :global(.chat-panel) { z-index: 2; }
-  .sa-stack > :global(.scan-panel) { z-index: 1; }
   .pp-stage {
     position: sticky;
     top: 0;
@@ -436,8 +406,7 @@ const axes = [
     }
     .pp-art::-webkit-scrollbar { display: none; }
 
-    .wf-stack,
-    .sa-stack {
+    .wf-stack {
       flex-direction: row;
       align-items: stretch;
       justify-content: flex-start;
@@ -460,19 +429,6 @@ const axes = [
     .wf-c > :global(*) { height: 100%; width: 100%; max-width: 100%; overflow: visible; }
     .wf-c2, .wf-c3 { margin-left: 0; }
     .wf-c3 :global(.board) { max-width: none; }
-
-    /* el chat y la solapa del scan también van lado a lado, deslizables.
-       El alto lo fija el contenedor: con height:auto el scan perdía el recorte
-       y crecía con todos los items apilados (queda muy alto). */
-    .sa-stack { height: 400px; }
-    .sa-stack > :global(.chat-panel),
-    .sa-stack > :global(.scan-panel) {
-      flex: 0 0 82vw;
-      width: 82vw;
-      max-width: 400px;
-      height: 100%;
-      scroll-snap-align: center;
-    }
   }
 
   @media (prefers-reduced-motion: reduce) {

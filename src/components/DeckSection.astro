@@ -201,7 +201,7 @@ const {
     z-index: 0;
     pointer-events: none;
     display: grid;
-    place-items: center; /* centra el gráfico de fondo (ej. las 4 layers) */
+    place-items: center; /* centra el gráfico de fondo, si la sección trae uno */
   }
 
   .ds-inner {
@@ -251,6 +251,13 @@ const {
   /* palabra resaltada dentro del título (viene por set:html) */
   .ds-title :global(.hl) {
     color: var(--accent);
+  }
+  /* el conector del título cede con opacity, NO con otro color: hay 14 temas y
+     var(--fg) tiene más contraste que var(--accent) en todos, así que pintarlo
+     de otro color lo haría resaltar en vez de ceder. La opacity lo empuja
+     siempre hacia el fondo, sea el que sea. */
+  .ds-title :global(.t-and) {
+    opacity: 0.45;
   }
 
   .ds-body {

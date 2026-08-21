@@ -6,7 +6,6 @@ import Header from "../components/Header/Header.astro";
 import Hero from "../components/Hero/Hero.astro";
 import DeckSection from "../components/DeckSection.astro";
 import Clients from "../components/Clients.astro";
-import WuruLayers from "../components/WuruLayers.astro";
 import LiveStatus from "../components/LiveStatus.astro";
 import PlatformPinned from "../components/PlatformPinned.astro";
 import SolutionsPinned from "../components/SolutionsPinned.astro";
@@ -14,8 +13,7 @@ import FinalCta from "../components/FinalCta.astro";
 import Footer from "../components/Footer/Footer.astro";
 
 const wuruTitle =
-  `<span class='t-the'>The</span>` +
-  `<span class='t-hero hl'>Intelligence Layer</span>` +
+  `<span class='t-hero hl'>Agents <span class='t-and'>and</span><br>smart workflows</span>` +
   `<span class='t-sub'>for every healthcare operation</span>`;
 
 ---
@@ -34,7 +32,6 @@ const wuruTitle =
     title={wuruTitle}
     paragraphs={["Every interaction expands what your teams can delegate — <strong>people stay at the center</strong>."]}
   >
-    <WuruLayers slot="bg" />
     <div class="wuru-live">
       <LiveStatus />
     </div>

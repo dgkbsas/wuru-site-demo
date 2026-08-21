@@ -13,7 +13,7 @@ import { solutions, AXIS_LABELS } from "../data/solutions";
         </span>
         <span class="sol-sum">{s.summary}</span>
         <span class="sol-axes">
-          {(["workflow", "embedded", "standalone"] as const)
+          {(["workflow", "agents"] as const)
             .filter((k) => s.axes[k] !== "none")
             .map((k) => (
               <span class={`sol-ax ax-${s.axes[k]}`}>

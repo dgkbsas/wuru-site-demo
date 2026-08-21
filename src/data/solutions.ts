@@ -1,6 +1,6 @@
 // Las áreas de Wúru (el "otro eje" de la matriz: áreas × ejes).
-// Cada solución vive en UNA de las tres capas — no en varias.
-// Textos y asignación de capa tomados del overview de producto de Wúru.
+// Dos ejes: smart workflows y agents. Una solución puede vivir en uno o en ambos.
+// Textos y asignación tomados del overview de producto de Wúru.
 export type AxisUse = "core" | "light" | "none";
 
 /** Dato duro de la solución. `source` cuando viene de evidencia externa. */
@@ -15,8 +15,8 @@ export interface Solution {
   name: string;
   summary: string;
   detail: string;
-  /** en qué capa vive esta solución: workflow · embedded · standalone */
-  axes: { workflow: AxisUse; embedded: AxisUse; standalone: AxisUse };
+  /** en qué eje vive esta solución: workflow · agents */
+  axes: { workflow: AxisUse; agents: AxisUse };
   /** métricas reales del overview de producto. Todavía no se renderizan:
    *  están acá para las páginas de cada solución. */
   metrics?: Metric[];
@@ -24,11 +24,11 @@ export interface Solution {
   status?: string;
 }
 
-const WORKFLOW: Solution["axes"] = { workflow: "core", embedded: "none", standalone: "none" };
-const STANDALONE: Solution["axes"] = { workflow: "none", embedded: "none", standalone: "core" };
-// Surgery es la única que usa las tres capas: el workflow de programación, la
-// IA dentro del flujo (Agenda Mágica) y el asistente por WhatsApp.
-const ALL: Solution["axes"] = { workflow: "core", embedded: "core", standalone: "core" };
+const WORKFLOW: Solution["axes"] = { workflow: "core", agents: "none" };
+const AGENTS: Solution["axes"] = { workflow: "none", agents: "core" };
+// Surgery es la única que cruza los dos ejes: el workflow de programación más
+// los agentes que trabajan sobre él (Agenda Mágica, asistente por WhatsApp).
+const BOTH: Solution["axes"] = { workflow: "core", agents: "core" };
 
 export const solutions: Solution[] = [
   {
@@ -38,7 +38,7 @@ export const solutions: Solution[] = [
       "Surgical scheduling, real-time coordination and booking over WhatsApp.",
     detail:
       "Scheduling an operating room means coordinating people: surgeons, anesthesiologists, scrub nurses, admissions and patients. Wúru QX orchestrates that team across four moments — request, planning, confirmation and execution — and in each one the AI does the repetitive work.",
-    axes: ALL,
+    axes: BOTH,
     metrics: [
       { value: "−40%", label: "reduction in administrative tasks" },
       { value: "24/7", label: "self-service booking over WhatsApp" },
@@ -78,7 +78,7 @@ export const solutions: Solution[] = [
     summary: "Structured reports dictated in the reading room.",
     detail:
       "An agent that sits with the radiologist in the reading room. They dictate as always — the AI transcribes, structures the report on the service's own template and leaves it ready to sign. No new platform, no change in how they work.",
-    axes: STANDALONE,
+    axes: AGENTS,
   },
   {
     slug: "bedside",
@@ -86,7 +86,7 @@ export const solutions: Solution[] = [
     summary: "Clinical notes dictated over WhatsApp and posted into the HIS.",
     detail:
       "The clinical record competes with the patient: it gets postponed, piles up and is filled in from memory at the end of the shift. This agent solves it through the channel the professional already has in hand — send an audio, get a structured draft, confirm, and the note lands in the institution's HIS.",
-    axes: STANDALONE,
+    axes: AGENTS,
     metrics: [{ value: "< 5 min", label: "for the complete dictate-review-confirm flow" }],
     status: "In implementation with an institution in the region, integrated to its EHR",
   },
@@ -96,7 +96,7 @@ export const solutions: Solution[] = [
     summary: "Objective operating-room timestamps, with no logging burden.",
     detail:
       "Everything Wúru optimizes depends on one thing: knowing when each thing happened. Today those times are entered by hand, late and with bias. A computer-vision agent on the OR camera detects patient in and patient out and leaves an objective timestamp, without adding a single logging task to the team.",
-    axes: STANDALONE,
+    axes: AGENTS,
     metrics: [
       {
         value: "≥0.97",
@@ -114,7 +114,6 @@ export const solutions: Solution[] = [
 ];
 
 export const AXIS_LABELS: Record<string, string> = {
-  workflow: "workflow",
-  embedded: "embedded",
-  standalone: "standalone",
+  workflow: "smart workflow",
+  agents: "agentic",
 };
