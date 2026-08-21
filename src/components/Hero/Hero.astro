@@ -1,5 +1,18 @@
 ---
 import HeroText from "./HeroText.astro";
+
+// Assets del hero. Los nombres llevan hash de contenido a propósito: vercel.json
+// sirve /video/* como `immutable` a un año, así que un export nuevo TIENE que
+// cambiar de nombre — si no, queda cacheado el viejo para siempre.
+// Dos resoluciones × dos codecs: un teléfono de 390pt@3x muestra ~1170px, así
+// que mandarle el master de 2560 son 4x los píxeles que puede ver.
+const VIDEO = {
+  poster: "/video/hero-poster.cc233694.webp",
+  desktopWebm: "/video/hero.404200f8.webm", // VP9, 1.5 MB
+  desktopMp4: "/video/hero.74358575.mp4", //  master de Premiere, 14 MB
+  mobileWebm: "/video/hero-m.78d2ced1.webm", // VP9 @1280, 505 KB
+  mobileMp4: "/video/hero-m.1fcafeb5.mp4", //  h264 @1280, 905 KB
+};
 ---
 
 <script>
@@ -37,15 +50,44 @@ import HeroText from "./HeroText.astro";
     // se acelera desde el player (no re-encodeando) → cero pérdida de calidad
     const SPEED = 1.2;
     const setSpeed = () => (heroVideo.playbackRate = SPEED);
-    setSpeed();
-    // algunos navegadores resetean el rate al recargar la fuente / al loopear
     heroVideo.addEventListener("loadedmetadata", setSpeed);
     heroVideo.addEventListener("play", setSpeed);
 
+    // El poster es el mismo primer frame del loop: se muestra apenas está y
+    // después el video lo reemplaza sin que se note el cambio.
     const reveal = () => heroVideo.setAttribute("data-loaded", "");
-    if (heroVideo.readyState >= 2) reveal();
-    else heroVideo.addEventListener("loadeddata", reveal, { once: true });
-    if (reduce) heroVideo.pause();
+    const posterImg = new Image();
+    posterImg.onload = reveal;
+    posterImg.onerror = reveal;
+    posterImg.src = heroVideo.poster;
+
+    // Qué archivo pedir: la resolución la define el viewport, el codec lo define
+    // el soporte real del navegador. Se resuelve acá y no con <source media>
+    // porque ese atributo no tiene soporte uniforme — justamente en iOS Safari,
+    // que es el mobile que importa.
+    const d = heroVideo.dataset;
+    const chico = window.matchMedia("(max-width: 1024px)").matches;
+    const vp9 = heroVideo.canPlayType('video/webm; codecs="vp9"') !== "";
+    const src = chico ? (vp9 ? d.webmM : d.mp4M) : vp9 ? d.webm : d.mp4;
+
+    // Con reduced-motion no se descarga nada: el poster ya dice lo mismo.
+    if (!reduce && src) {
+      const arrancar = () => {
+        if (heroVideo.src) return;
+        heroVideo.src = src;
+        heroVideo.load();
+        setSpeed();
+        heroVideo.play()?.catch(() => {});
+      };
+      // recién cuando la página está interactiva: así el video no le compite
+      // el ancho de banda al resto, y quien rebota enseguida no se lo baja
+      const idle = (cb: () => void) =>
+        "requestIdleCallback" in window
+          ? (window as any).requestIdleCallback(cb, { timeout: 1500 })
+          : setTimeout(cb, 200);
+      if (document.readyState === "complete") idle(arrancar);
+      else window.addEventListener("load", () => idle(arrancar), { once: true });
+    }
   }
 
   // Parallax: la imagen se mueve más lento que la página al salir el hero, y el
@@ -81,18 +123,24 @@ import HeroText from "./HeroText.astro";
          re-encodear, para no perder calidad). El contenedor lleva un
          placeholder diminuto (base64, borroso) para que no haya hueco. -->
     <div class="hero-scene">
+      <!-- sin src: la fuente la elige el script según viewport y codec, y la
+           carga arranca cuando la página ya está interactiva. Mientras tanto se
+           ve el poster (30 KB), que es el mismo primer frame. -->
       <video
         class="hero-scene-img"
-        poster="/video/hero-poster.webp"
-        preload="metadata"
+        poster={VIDEO.poster}
+        preload="none"
         autoplay
         loop
         muted
         playsinline
         aria-hidden="true"
-      >
-        <source src="/video/hero.mp4" type="video/mp4" />
-      </video>
+        data-webm={VIDEO.desktopWebm}
+        data-mp4={VIDEO.desktopMp4}
+        data-webm-m={VIDEO.mobileWebm}
+        data-mp4-m={VIDEO.mobileMp4}></video>
+      <!-- sin JS no hay video: que al menos se vea el poster nítido -->
+      <noscript><style>.hero-scene-img { opacity: 1 !important; }</style></noscript>
     </div>
 
     <!-- Texto del hero -->
